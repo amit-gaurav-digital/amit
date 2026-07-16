@@ -1,0 +1,37 @@
+{
+  "name": "ai-blogging-backend",
+  "version": "1.0.0",
+  "description": "AI-powered blog generation and management system",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "seed": "node scripts/seed-db.js",
+    "migrate": "node scripts/migrate.js"
+  },
+  "keywords": ["blogging", "ai", "content-generation"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.5.0",
+    "dotenv": "^16.3.1",
+    "openai": "^4.11.1",
+    "node-cron": "^3.0.2",
+    "bullmq": "^4.11.4",
+    "redis": "^4.6.9",
+    "axios": "^1.5.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.1.0",
+    "sharp": "^0.32.6",
+    "form-data": "^4.0.0",
+    "stripe": "^13.9.0",
+    "nodemailer": "^6.9.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
