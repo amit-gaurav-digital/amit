@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const authenticate = require('../middleware/authenticate');
+const authorizationService = require('../services/authorization');
 const Analytics = require('../models/Analytics');
 const AnalyticsSession = require('../models/AnalyticsSession');
 const AnalyticsEvent = require('../models/AnalyticsEvent');
@@ -25,7 +25,7 @@ const verifyBlogOwnership = async (req, res, next) => {
 
 // GET /api/analytics/dashboard/:blogId
 // Get analytics dashboard data
-router.get('/dashboard/:blogId', authenticate, verifyBlogOwnership, async (req, res) => {
+router.get('/dashboard/:blogId', authorizationService.requireAuth, verifyBlogOwnership, async (req, res) => {
   try {
     const { blogId } = req.params;
     const { startDate, endDate } = req.query;
@@ -78,7 +78,7 @@ router.get('/dashboard/:blogId', authenticate, verifyBlogOwnership, async (req, 
 
 // GET /api/analytics/realtime/:blogId
 // Get real-time metrics
-router.get('/realtime/:blogId', authenticate, verifyBlogOwnership, async (req, res) => {
+router.get('/realtime/:blogId', authorizationService.requireAuth, verifyBlogOwnership, async (req, res) => {
   try {
     const { blogId } = req.params;
     const realtimeService = req.app.locals.realtimeAnalytics;
@@ -181,7 +181,7 @@ router.post('/session/:blogId/:sessionId/end', async (req, res) => {
 
 // GET /api/analytics/hourly/:blogId
 // Get hourly breakdown for a specific date
-router.get('/hourly/:blogId', authenticate, verifyBlogOwnership, async (req, res) => {
+router.get('/hourly/:blogId', authorizationService.requireAuth, verifyBlogOwnership, async (req, res) => {
   try {
     const { blogId } = req.params;
     const { date } = req.query;
@@ -202,7 +202,7 @@ router.get('/hourly/:blogId', authenticate, verifyBlogOwnership, async (req, res
 
 // GET /api/analytics/engagement/:blogId
 // Get detailed engagement metrics
-router.get('/engagement/:blogId', authenticate, verifyBlogOwnership, async (req, res) => {
+router.get('/engagement/:blogId', authorizationService.requireAuth, verifyBlogOwnership, async (req, res) => {
   try {
     const { blogId } = req.params;
     const { startDate, endDate } = req.query;
@@ -232,7 +232,7 @@ router.get('/engagement/:blogId', authenticate, verifyBlogOwnership, async (req,
 
 // GET /api/analytics/performance/:blogId
 // Get performance metrics
-router.get('/performance/:blogId', authenticate, verifyBlogOwnership, async (req, res) => {
+router.get('/performance/:blogId', authorizationService.requireAuth, verifyBlogOwnership, async (req, res) => {
   try {
     const { blogId } = req.params;
     const { startDate, endDate } = req.query;
@@ -253,7 +253,7 @@ router.get('/performance/:blogId', authenticate, verifyBlogOwnership, async (req
 
 // GET /api/analytics/events/:blogId
 // Get event summary
-router.get('/events/:blogId', authenticate, verifyBlogOwnership, async (req, res) => {
+router.get('/events/:blogId', authorizationService.requireAuth, verifyBlogOwnership, async (req, res) => {
   try {
     const { blogId } = req.params;
     const { startDate, endDate } = req.query;
@@ -284,7 +284,7 @@ router.get('/events/:blogId', authenticate, verifyBlogOwnership, async (req, res
 
 // GET /api/analytics/sessions/:blogId
 // Get sessions list (paginated)
-router.get('/sessions/:blogId', authenticate, verifyBlogOwnership, async (req, res) => {
+router.get('/sessions/:blogId', authorizationService.requireAuth, verifyBlogOwnership, async (req, res) => {
   try {
     const { blogId } = req.params;
     const { page = 1, limit = 20, startDate, endDate } = req.query;
@@ -319,7 +319,7 @@ router.get('/sessions/:blogId', authenticate, verifyBlogOwnership, async (req, r
 
 // GET /api/analytics/sessions/:blogId/:sessionId
 // Get single session details
-router.get('/sessions/:blogId/:sessionId', authenticate, verifyBlogOwnership, async (req, res) => {
+router.get('/sessions/:blogId/:sessionId', authorizationService.requireAuth, verifyBlogOwnership, async (req, res) => {
   try {
     const { sessionId } = req.params;
 
@@ -344,7 +344,7 @@ router.get('/sessions/:blogId/:sessionId', authenticate, verifyBlogOwnership, as
 
 // GET /api/analytics/trends/:blogId/:metric
 // Get trend for specific metric
-router.get('/trends/:blogId/:metric', authenticate, verifyBlogOwnership, async (req, res) => {
+router.get('/trends/:blogId/:metric', authorizationService.requireAuth, verifyBlogOwnership, async (req, res) => {
   try {
     const { blogId, metric } = req.params;
     const { days = 30 } = req.query;
