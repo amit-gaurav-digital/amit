@@ -32,8 +32,19 @@ const gaConfigSchema = new mongoose.Schema({
     frequency: { type: String, enum: ['hourly', '6hourly', 'daily'], default: 'daily' },
     lastSyncAt: Date,
     nextSyncAt: Date,
-    syncStatus: { type: String, enum: ['idle', 'syncing', 'completed', 'failed'] }
+    syncStatus: { type: String, enum: ['idle', 'syncing', 'completed', 'failed'] },
+    scEnabled: { type: Boolean, default: false },
+    scLastSyncAt: Date,
+    scNextSyncAt: Date,
+    scSyncStatus: { type: String, enum: ['idle', 'syncing', 'completed', 'failed'] },
+    scSyncErrors: [{
+      timestamp: Date,
+      error: String,
+      details: String
+    }]
   },
+
+  scSiteUrl: String,
 
   metricsMapped: {
     pageViews: { type: String, default: 'screenPageViews' },

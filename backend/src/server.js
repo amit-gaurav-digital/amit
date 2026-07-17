@@ -34,9 +34,10 @@ mongoose.connect(mongoUri, {
   useUnifiedTopology: true,
   connectTimeoutMS: 5000,
   serverSelectionTimeoutMS: 5000
-}).then(() => {
+}).then(async () => {
   console.log('Connected to MongoDB');
-  initializeRoles();
+  await initializeRoles();
+  await initializeSyncScheduler();
 }).catch(err => {
   console.warn('MongoDB connection warning:', err.message);
   console.log('Server will continue without database');
@@ -51,6 +52,16 @@ async function initializeRoles() {
     }
   } catch (error) {
     console.warn('Warning initializing roles:', error.message);
+  }
+}
+
+async function initializeSyncScheduler() {
+  try {
+    const syncScheduler = require('./services/syncScheduler');
+    await syncScheduler.init();
+    console.log('Sync scheduler initialized');
+  } catch (error) {
+    console.warn('Warning initializing sync scheduler:', error.message);
   }
 }
 
@@ -73,6 +84,7 @@ try { app.use('/api/audit', require('./routes/audit')); } catch (e) { console.wa
 try { app.use('/api/ai', require('./routes/ai')); } catch (e) { console.warn('AI route error:', e.message); }
 try { app.use('/api/analytics', require('./routes/analyticsPhase1')); } catch (e) { console.warn('Analytics Phase 1 route error:', e.message); }
 try { app.use('/api/analytics', require('./routes/analyticsPhase2')); } catch (e) { console.warn('Analytics Phase 2 route error:', e.message); }
+try { app.use('/api/integrations', require('./routes/integrations')); } catch (e) { console.warn('Integrations route error:', e.message); }
 
 // Load feature routes if they exist
 try { app.use('/api/translation', require('./routes/translation')); } catch (e) {}
