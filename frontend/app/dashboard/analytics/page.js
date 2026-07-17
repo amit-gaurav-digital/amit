@@ -365,6 +365,152 @@ export default function AnalyticsDashboard() {
         </div>
       )}
 
+      {/* Advanced Features Section */}
+      <div style={{
+        backgroundColor: '#f8fafc',
+        borderRadius: '8px',
+        padding: '25px',
+        marginBottom: '30px',
+        border: '1px solid #e2e8f0'
+      }}>
+        <h2 style={{ margin: '0 0 20px 0', color: '#1f2937', fontSize: '20px', fontWeight: 'bold' }}>
+          🚀 Advanced Analytics Tools
+        </h2>
+        <p style={{ margin: '0 0 20px 0', color: '#6b7280', fontSize: '14px' }}>
+          Manage goals, alerts, and automated reporting
+        </p>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+          gap: '15px'
+        }}>
+          {/* Goals Card */}
+          <Link href="/dashboard/analytics/goals" style={{ textDecoration: 'none' }}>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              padding: '16px',
+              border: '1px solid #e5e7eb',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px',
+              height: '100%',
+              ':hover': { boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'}
+            onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}>
+              <div style={{ fontSize: '28px' }}>🎯</div>
+              <h4 style={{ margin: '0 0 4px 0', color: '#1f2937', fontWeight: '600', fontSize: '15px' }}>
+                Goals & Conversions
+              </h4>
+              <p style={{ margin: '0', color: '#6b7280', fontSize: '13px', lineHeight: '1.4' }}>
+                Track conversion goals and measure success metrics
+              </p>
+              <div style={{ marginTop: 'auto', paddingTop: '8px', borderTop: '1px solid #e5e7eb' }}>
+                <button style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  backgroundColor: '#3b82f6',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: '500'
+                }}>
+                  Manage Goals →
+                </button>
+              </div>
+            </div>
+          </Link>
+
+          {/* Alerts Card */}
+          <Link href="/dashboard/analytics/alerts" style={{ textDecoration: 'none' }}>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              padding: '16px',
+              border: '1px solid #e5e7eb',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px',
+              height: '100%'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'}
+            onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}>
+              <div style={{ fontSize: '28px' }}>🚨</div>
+              <h4 style={{ margin: '0 0 4px 0', color: '#1f2937', fontWeight: '600', fontSize: '15px' }}>
+                Alerts & Anomalies
+              </h4>
+              <p style={{ margin: '0', color: '#6b7280', fontSize: '13px', lineHeight: '1.4' }}>
+                Monitor metrics and get notified of anomalies
+              </p>
+              <div style={{ marginTop: 'auto', paddingTop: '8px', borderTop: '1px solid #e5e7eb' }}>
+                <button style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  backgroundColor: '#ef4444',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: '500'
+                }}>
+                  Setup Alerts →
+                </button>
+              </div>
+            </div>
+          </Link>
+
+          {/* Reports Card */}
+          <Link href="/dashboard/analytics/reports" style={{ textDecoration: 'none' }}>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              padding: '16px',
+              border: '1px solid #e5e7eb',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px',
+              height: '100%'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'}
+            onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}>
+              <div style={{ fontSize: '28px' }}>📋</div>
+              <h4 style={{ margin: '0 0 4px 0', color: '#1f2937', fontWeight: '600', fontSize: '15px' }}>
+                Reports & Scheduling
+              </h4>
+              <p style={{ margin: '0', color: '#6b7280', fontSize: '13px', lineHeight: '1.4' }}>
+                Generate and automate analytics reports
+              </p>
+              <div style={{ marginTop: 'auto', paddingTop: '8px', borderTop: '1px solid #e5e7eb' }}>
+                <button style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  backgroundColor: '#8b5cf6',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: '500'
+                }}>
+                  Create Reports →
+                </button>
+              </div>
+            </div>
+          </Link>
+        </div>
+      </div>
+
       {data && selectedBlog && token ? (
         <>
           {/* Metrics Grid */}
