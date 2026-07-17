@@ -249,7 +249,7 @@ export default function BlogsPage() {
                       {blog.publishedAt ? new Date(blog.publishedAt).toLocaleDateString() : 'Not published'}
                     </td>
                     <td style={{ padding: '15px', textAlign: 'center' }}>
-                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
                         <Link href={`/dashboard/blogs/${blog._id}`}>
                           <button style={{
                             padding: '6px 12px',
@@ -264,6 +264,22 @@ export default function BlogsPage() {
                             Edit
                           </button>
                         </Link>
+                        {blog.status === 'in_review' && (
+                          <Link href={`/dashboard/blogs/${blog._id}/review`}>
+                            <button style={{
+                              padding: '6px 12px',
+                              backgroundColor: '#fef3c7',
+                              color: '#92400e',
+                              border: 'none',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              fontSize: '12px',
+                              fontWeight: '600'
+                            }}>
+                              Review
+                            </button>
+                          </Link>
+                        )}
                         {blog.status === 'draft' && (
                           <button
                             onClick={() => handlePublish(blog._id)}
