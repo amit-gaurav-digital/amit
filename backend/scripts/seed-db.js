@@ -32,13 +32,13 @@ async function seedDatabase() {
     if (!adminExists) {
       const adminUser = new User({
         email: 'admin@blog.com',
-        passwordHash: 'Admin@2024!',
+        passwordHash: 'Admin@2024!!',
         name: 'Admin User',
         role: 'admin',
         isActive: true
       });
       await adminUser.save();
-      console.log('Admin user created: admin@blog.com / Admin@2024!');
+      console.log('Admin user created: admin@blog.com / Admin@2024!!');
     } else {
       console.log('Admin user already exists');
     }
