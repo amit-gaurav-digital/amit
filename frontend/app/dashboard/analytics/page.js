@@ -3,6 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import GoogleAnalyticsWidget from '@/components/analytics/GoogleAnalyticsWidget';
+import SearchConsoleWidget from '@/components/analytics/SearchConsoleWidget';
+import RealtimeVisitors from '@/components/analytics/RealtimeVisitors';
+import SEOMetrics from '@/components/analytics/SEOMetrics';
+import KeywordRankings from '@/components/analytics/KeywordRankings';
+import TrafficSources from '@/components/analytics/TrafficSources';
 
 export default function AnalyticsDashboard() {
   const router = useRouter();
@@ -12,25 +18,27 @@ export default function AnalyticsDashboard() {
   const [selectedBlog, setSelectedBlog] = useState(null);
   const [dateRange, setDateRange] = useState('30');
   const [error, setError] = useState(null);
+  const [token, setToken] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
+    const authToken = localStorage.getItem('token');
+    if (!authToken) {
       router.push('/login');
       return;
     }
+    setToken(authToken);
 
     const userData = localStorage.getItem('user');
     if (userData) {
       const user = JSON.parse(userData);
-      fetchBlogs(user._id);
+      fetchBlogs(user._id, authToken);
     }
   }, [router]);
 
-  const fetchBlogs = async (userId) => {
+  const fetchBlogs = async (userId, authToken) => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blogs`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        headers: { 'Authorization': `Bearer ${authToken}` }
       });
 
       if (response.ok) {
@@ -38,7 +46,7 @@ export default function AnalyticsDashboard() {
         setBlogs(result.blogs || []);
         if (result.blogs && result.blogs.length > 0) {
           setSelectedBlog(result.blogs[0]._id);
-          fetchAnalytics(result.blogs[0]._id, dateRange);
+          fetchAnalytics(result.blogs[0]._id, dateRange, authToken);
         } else {
           setLoading(false);
         }
@@ -49,7 +57,7 @@ export default function AnalyticsDashboard() {
     }
   };
 
-  const fetchAnalytics = async (blogId, days) => {
+  const fetchAnalytics = async (blogId, days, authToken) => {
     try {
       setLoading(true);
       const endDate = new Date();
@@ -58,7 +66,7 @@ export default function AnalyticsDashboard() {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/analytics/dashboard/${blogId}?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`,
         {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+          headers: { 'Authorization': `Bearer ${authToken}` }
         }
       );
 
@@ -75,17 +83,19 @@ export default function AnalyticsDashboard() {
 
   const handleBlogChange = (blogId) => {
     setSelectedBlog(blogId);
-    fetchAnalytics(blogId, dateRange);
+    if (token) {
+      fetchAnalytics(blogId, dateRange, token);
+    }
   };
 
   const handleDateRangeChange = (days) => {
     setDateRange(days);
-    if (selectedBlog) {
-      fetchAnalytics(selectedBlog, days);
+    if (selectedBlog && token) {
+      fetchAnalytics(selectedBlog, days, token);
     }
   };
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <div style={{ padding: '30px', textAlign: 'center' }}>
         <div style={{ fontSize: '24px', marginBottom: '15px' }}>📊</div>
@@ -94,18 +104,10 @@ export default function AnalyticsDashboard() {
     );
   }
 
-  if (error) {
+  if (error && !data) {
     return (
       <div style={{ padding: '30px', color: '#dc3545' }}>
         <p>Error: {error}</p>
-      </div>
-    );
-  }
-
-  if (!data) {
-    return (
-      <div style={{ padding: '30px', textAlign: 'center', color: '#6b7280' }}>
-        <p>No analytics data available. Create and view your first blog!</p>
       </div>
     );
   }
@@ -179,189 +181,238 @@ export default function AnalyticsDashboard() {
         </div>
       </div>
 
-      {/* Metrics Grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '20px',
-        marginBottom: '30px'
-      }}>
-        <MetricCard
-          title="Total Views"
-          value={data.totalViews}
-          icon="👁️"
-          color="#3b82f6"
-        />
-        <MetricCard
-          title="Total Visitors"
-          value={data.totalVisitors}
-          icon="👥"
-          color="#8b5cf6"
-        />
-        <MetricCard
-          title="Avg Engagement"
-          value={data.avgEngagementScore?.toFixed(1) || 0}
-          icon="💬"
-          color="#10b981"
-          suffix="%"
-        />
-        <MetricCard
-          title="Bounce Rate"
-          value={data.avgBounceRate?.toFixed(1) || 0}
-          icon="🚫"
-          color="#f59e0b"
-          suffix="%"
-        />
-      </div>
+      {data && selectedBlog && token ? (
+        <>
+          {/* Metrics Grid */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '20px',
+            marginBottom: '30px'
+          }}>
+            <MetricCard
+              title="Total Views"
+              value={data.totalViews}
+              icon="👁️"
+              color="#3b82f6"
+            />
+            <MetricCard
+              title="Total Visitors"
+              value={data.totalVisitors}
+              icon="👥"
+              color="#8b5cf6"
+            />
+            <MetricCard
+              title="Avg Engagement"
+              value={data.avgEngagementScore?.toFixed(1) || 0}
+              icon="💬"
+              color="#10b981"
+              suffix="%"
+            />
+            <MetricCard
+              title="Bounce Rate"
+              value={data.avgBounceRate?.toFixed(1) || 0}
+              icon="🚫"
+              color="#f59e0b"
+              suffix="%"
+            />
+          </div>
 
-      {/* Charts Section */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '2fr 1fr',
-        gap: '20px',
-        marginBottom: '30px'
-      }}>
-        {/* Trend Chart */}
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '8px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-          padding: '20px'
-        }}>
-          <h3 style={{ margin: '0 0 20px 0', color: '#1f2937' }}>📈 Views Trend</h3>
-          <div style={{ height: '300px', display: 'flex', alignItems: 'flex-end', gap: '8px', paddingBottom: '20px' }}>
-            {data.dailyTrend && data.dailyTrend.length > 0 ? (
-              data.dailyTrend.map((day, idx) => {
-                const maxViews = Math.max(...data.dailyTrend.map(d => d.views));
-                const height = (day.views / maxViews) * 250;
-                return (
-                  <div
-                    key={idx}
-                    style={{
-                      flex: 1,
-                      height: `${height}px`,
-                      backgroundColor: '#3b82f6',
+          {/* Google Integrations Section */}
+          <div style={{ marginBottom: '30px' }}>
+            <h2 style={{ color: '#1f2937', marginBottom: '20px', fontSize: '20px', fontWeight: 'bold' }}>
+              📊 Google Integrations
+            </h2>
+
+            {/* GA & SC Widgets */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '20px',
+              marginBottom: '30px'
+            }}>
+              <GoogleAnalyticsWidget blogId={selectedBlog} token={token} />
+              <SearchConsoleWidget blogId={selectedBlog} token={token} />
+            </div>
+
+            {/* Realtime & SEO */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '20px',
+              marginBottom: '30px'
+            }}>
+              <RealtimeVisitors blogId={selectedBlog} token={token} />
+              <SEOMetrics blogId={selectedBlog} token={token} />
+            </div>
+
+            {/* Traffic Sources */}
+            <div style={{ marginBottom: '30px' }}>
+              <TrafficSources blogId={selectedBlog} token={token} />
+            </div>
+
+            {/* Keywords */}
+            <div>
+              <KeywordRankings blogId={selectedBlog} token={token} />
+            </div>
+          </div>
+        </>
+      ) : null}
+
+          {/* Charts Section */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '2fr 1fr',
+            gap: '20px',
+            marginBottom: '30px'
+          }}>
+            {/* Trend Chart */}
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+              padding: '20px'
+            }}>
+              <h3 style={{ margin: '0 0 20px 0', color: '#1f2937' }}>📈 Views Trend</h3>
+              <div style={{ height: '300px', display: 'flex', alignItems: 'flex-end', gap: '8px', paddingBottom: '20px' }}>
+                {data.dailyTrend && data.dailyTrend.length > 0 ? (
+                  data.dailyTrend.map((day, idx) => {
+                    const maxViews = Math.max(...data.dailyTrend.map(d => d.views));
+                    const height = (day.views / maxViews) * 250;
+                    return (
+                      <div
+                        key={idx}
+                        style={{
+                          flex: 1,
+                          height: `${height}px`,
+                          backgroundColor: '#3b82f6',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          opacity: 0.8,
+                          transition: 'opacity 0.2s'
+                        }}
+                        title={`${day.date}: ${day.views} views`}
+                        onMouseEnter={(e) => e.target.style.opacity = '1'}
+                        onMouseLeave={(e) => e.target.style.opacity = '0.8'}
+                      />
+                    );
+                  })
+                ) : (
+                  <p style={{ color: '#6b7280' }}>No data available</p>
+                )}
+              </div>
+            </div>
+
+            {/* Top Pages */}
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+              padding: '20px'
+            }}>
+              <h3 style={{ margin: '0 0 20px 0', color: '#1f2937' }}>🔝 Top Pages</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {data.topPages && data.topPages.length > 0 ? (
+                  data.topPages.slice(0, 5).map((page, idx) => (
+                    <div key={idx} style={{
+                      padding: '10px',
+                      backgroundColor: '#f9fafb',
                       borderRadius: '4px',
-                      cursor: 'pointer',
-                      opacity: 0.8,
-                      transition: 'opacity 0.2s'
-                    }}
-                    title={`${day.date}: ${day.views} views`}
-                    onMouseEnter={(e) => e.target.style.opacity = '1'}
-                    onMouseLeave={(e) => e.target.style.opacity = '0.8'}
-                  />
-                );
-              })
-            ) : (
-              <p style={{ color: '#6b7280' }}>No data available</p>
-            )}
+                      borderLeft: '3px solid #3b82f6'
+                    }}>
+                      <p style={{ margin: '0 0 5px 0', fontSize: '13px', color: '#1f2937', fontWeight: '500' }}>
+                        {page.url?.split('/').pop() || 'Page'}
+                      </p>
+                      <p style={{ margin: 0, fontSize: '12px', color: '#6b7280' }}>
+                        {page.totalEvents} events
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <p style={{ color: '#6b7280', fontSize: '13px' }}>No page data</p>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* Top Pages */}
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '8px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-          padding: '20px'
-        }}>
-          <h3 style={{ margin: '0 0 20px 0', color: '#1f2937' }}>🔝 Top Pages</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {data.topPages && data.topPages.length > 0 ? (
-              data.topPages.slice(0, 5).map((page, idx) => (
-                <div key={idx} style={{
-                  padding: '10px',
-                  backgroundColor: '#f9fafb',
-                  borderRadius: '4px',
-                  borderLeft: '3px solid #3b82f6'
-                }}>
-                  <p style={{ margin: '0 0 5px 0', fontSize: '13px', color: '#1f2937', fontWeight: '500' }}>
-                    {page.url?.split('/').pop() || 'Page'}
-                  </p>
-                  <p style={{ margin: 0, fontSize: '12px', color: '#6b7280' }}>
-                    {page.totalEvents} events
-                  </p>
+          {/* Sessions & Conversions */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '20px'
+          }}>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+              padding: '20px'
+            }}>
+              <h3 style={{ margin: '0 0 20px 0', color: '#1f2937' }}>📊 Session Analysis</h3>
+              {data.sessionsAnalysis && Object.keys(data.sessionsAnalysis).length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                  <div>
+                    <p style={{ margin: '0 0 5px 0', color: '#6b7280', fontSize: '12px' }}>Total Sessions</p>
+                    <p style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#3b82f6' }}>
+                      {data.sessionsAnalysis.totalSessions || 0}
+                    </p>
+                  </div>
+                  <div>
+                    <p style={{ margin: '0 0 5px 0', color: '#6b7280', fontSize: '12px' }}>Avg Duration</p>
+                    <p style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#8b5cf6' }}>
+                      {Math.floor(data.sessionsAnalysis.avgDuration || 0)}s
+                    </p>
+                  </div>
+                  <div>
+                    <p style={{ margin: '0 0 5px 0', color: '#6b7280', fontSize: '12px' }}>Bounce Rate</p>
+                    <p style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#f59e0b' }}>
+                      {(data.sessionsAnalysis.bounceRate || 0).toFixed(1)}%
+                    </p>
+                  </div>
                 </div>
-              ))
-            ) : (
-              <p style={{ color: '#6b7280', fontSize: '13px' }}>No page data</p>
-            )}
+              ) : (
+                <p style={{ color: '#6b7280' }}>No session data</p>
+              )}
+            </div>
+
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+              padding: '20px'
+            }}>
+              <h3 style={{ margin: '0 0 20px 0', color: '#1f2937' }}>🎯 Performance</h3>
+              {data.performanceMetrics && Object.keys(data.performanceMetrics).length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                  <div>
+                    <p style={{ margin: '0 0 5px 0', color: '#6b7280', fontSize: '12px' }}>Avg Load Time</p>
+                    <p style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#10b981' }}>
+                      {(data.performanceMetrics.avgPageLoadTime || 0).toFixed(0)}ms
+                    </p>
+                  </div>
+                  <div>
+                    <p style={{ margin: '0 0 5px 0', color: '#6b7280', fontSize: '12px' }}>FCP</p>
+                    <p style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#0ea5e9' }}>
+                      {(data.performanceMetrics.avgFCP || 0).toFixed(0)}ms
+                    </p>
+                  </div>
+                  <div>
+                    <p style={{ margin: '0 0 5px 0', color: '#6b7280', fontSize: '12px' }}>LCP</p>
+                    <p style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#ec4899' }}>
+                      {(data.performanceMetrics.avgLCP || 0).toFixed(0)}ms
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <p style={{ color: '#6b7280' }}>No performance data</p>
+              )}
+            </div>
           </div>
+        </>
+      ) : (
+        <div style={{ padding: '30px', textAlign: 'center', color: '#6b7280' }}>
+          <p>No analytics data available. Create and view your first blog!</p>
         </div>
-      </div>
-
-      {/* Sessions & Conversions */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '20px'
-      }}>
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '8px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-          padding: '20px'
-        }}>
-          <h3 style={{ margin: '0 0 20px 0', color: '#1f2937' }}>📊 Session Analysis</h3>
-          {data.sessionsAnalysis && Object.keys(data.sessionsAnalysis).length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <div>
-                <p style={{ margin: '0 0 5px 0', color: '#6b7280', fontSize: '12px' }}>Total Sessions</p>
-                <p style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#3b82f6' }}>
-                  {data.sessionsAnalysis.totalSessions || 0}
-                </p>
-              </div>
-              <div>
-                <p style={{ margin: '0 0 5px 0', color: '#6b7280', fontSize: '12px' }}>Avg Duration</p>
-                <p style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#8b5cf6' }}>
-                  {Math.floor(data.sessionsAnalysis.avgDuration || 0)}s
-                </p>
-              </div>
-              <div>
-                <p style={{ margin: '0 0 5px 0', color: '#6b7280', fontSize: '12px' }}>Bounce Rate</p>
-                <p style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#f59e0b' }}>
-                  {(data.sessionsAnalysis.bounceRate || 0).toFixed(1)}%
-                </p>
-              </div>
-            </div>
-          ) : (
-            <p style={{ color: '#6b7280' }}>No session data</p>
-          )}
-        </div>
-
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '8px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-          padding: '20px'
-        }}>
-          <h3 style={{ margin: '0 0 20px 0', color: '#1f2937' }}>🎯 Performance</h3>
-          {data.performanceMetrics && Object.keys(data.performanceMetrics).length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <div>
-                <p style={{ margin: '0 0 5px 0', color: '#6b7280', fontSize: '12px' }}>Avg Load Time</p>
-                <p style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#10b981' }}>
-                  {(data.performanceMetrics.avgPageLoadTime || 0).toFixed(0)}ms
-                </p>
-              </div>
-              <div>
-                <p style={{ margin: '0 0 5px 0', color: '#6b7280', fontSize: '12px' }}>FCP</p>
-                <p style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#0ea5e9' }}>
-                  {(data.performanceMetrics.avgFCP || 0).toFixed(0)}ms
-                </p>
-              </div>
-              <div>
-                <p style={{ margin: '0 0 5px 0', color: '#6b7280', fontSize: '12px' }}>LCP</p>
-                <p style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#ec4899' }}>
-                  {(data.performanceMetrics.avgLCP || 0).toFixed(0)}ms
-                </p>
-              </div>
-            </div>
-          ) : (
-            <p style={{ color: '#6b7280' }}>No performance data</p>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   );
 }
