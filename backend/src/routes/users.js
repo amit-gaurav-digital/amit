@@ -6,15 +6,16 @@ const router = express.Router();
 
 router.use(authorizationService.requireAuth);
 
-router.get('/', authorizationService.requirePermission('user.read'), async (req, res) => {
+router.get('/', authorizationService.requireAuth, async (req, res) => {
   try {
-    const { limit = 50, skip = 0, sortBy = 'createdAt', sortOrder = -1 } = req.query;
+    const { limit = 50, skip = 0, sortBy = 'createdAt', sortOrder = -1, role } = req.query;
 
     const result = await userManagementService.getAllUsers({
       limit: parseInt(limit),
       skip: parseInt(skip),
       sortBy,
-      sortOrder: parseInt(sortOrder)
+      sortOrder: parseInt(sortOrder),
+      role: role ? role.split(',').map(r => r.trim()) : undefined
     });
 
     res.json(result);
