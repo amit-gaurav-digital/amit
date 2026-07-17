@@ -1,6 +1,12 @@
 const User = require('../models/User');
 const Role = require('../models/Role');
-const Blog = require('../models/Blog');
+
+let Blog = null;
+try {
+  Blog = require('../models/Blog');
+} catch (e) {
+  console.warn('Blog model not found - blog-related permissions will be skipped');
+}
 
 class AuthorizationService {
   async hasPermission(userId, permission) {
@@ -52,6 +58,10 @@ class AuthorizationService {
 
   async canEditBlog(userId, blogId) {
     try {
+      if (!Blog) {
+        return await this.hasPermission(userId, 'blog.edit.all');
+      }
+
       const hasPermission = await this.hasPermission(userId, 'blog.edit.all');
 
       if (hasPermission) {
@@ -74,6 +84,10 @@ class AuthorizationService {
 
   async canDeleteBlog(userId, blogId) {
     try {
+      if (!Blog) {
+        return await this.hasPermission(userId, 'blog.delete.all');
+      }
+
       const hasPermission = await this.hasPermission(userId, 'blog.delete.all');
 
       if (hasPermission) {
