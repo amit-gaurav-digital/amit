@@ -176,7 +176,7 @@ export default function Dashboard() {
         <div style={{ padding: '30px' }}>
           {/* AI Features Quick Access */}
           <div style={{
-            backgroundColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             borderRadius: '12px',
             padding: '25px',
             marginBottom: '30px',
