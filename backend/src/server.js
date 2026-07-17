@@ -45,10 +45,12 @@ mongoose.connect(mongoUri, {
 async function initializeRoles() {
   try {
     const Role = require('./models/Role');
-    await Role.seedDefaultRoles();
-    console.log('Default roles initialized');
+    if (Role && Role.seedDefaultRoles) {
+      await Role.seedDefaultRoles();
+      console.log('Default roles initialized');
+    }
   } catch (error) {
-    console.error('Error initializing roles:', error);
+    console.warn('Warning initializing roles:', error.message);
   }
 }
 
@@ -60,10 +62,11 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/users', require('./routes/users'));
-app.use('/api/roles', require('./routes/roles'));
-app.use('/api/audit', require('./routes/audit'));
+// Load core routes with error handling
+try { app.use('/api/auth', require('./routes/auth')); } catch (e) { console.warn('Auth route error:', e.message); }
+try { app.use('/api/users', require('./routes/users')); } catch (e) { console.warn('Users route error:', e.message); }
+try { app.use('/api/roles', require('./routes/roles')); } catch (e) { console.warn('Roles route error:', e.message); }
+try { app.use('/api/audit', require('./routes/audit')); } catch (e) { console.warn('Audit route error:', e.message); }
 
 // Load feature routes if they exist
 try { app.use('/api/translation', require('./routes/translation')); } catch (e) {}
