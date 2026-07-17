@@ -93,6 +93,24 @@ const blogSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   },
+  // Workflow Integration
+  workflowId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'BlogWorkflow'
+  },
+  workflowTemplateId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'WorkflowTemplate'
+  },
+  requiresApproval: {
+    type: Boolean,
+    default: true
+  },
+  approvalStatus: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected', 'changes_requested'],
+    default: 'pending'
+  },
   createdAt: {
     type: Date,
     default: Date.now

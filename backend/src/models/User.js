@@ -64,6 +64,35 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: null
   },
+  // Workflow-related fields
+  workflowRoles: [{
+    role: {
+      type: String,
+      enum: ['writer', 'reviewer', 'approver', 'publisher', 'admin']
+    },
+    clientId: mongoose.Schema.Types.ObjectId,
+    assignedAt: Date
+  }],
+  expertiseAreas: [String],
+  reviewerStatus: {
+    type: String,
+    enum: ['available', 'busy', 'on_leave', 'unavailable'],
+    default: 'available'
+  },
+  maxConcurrentReviews: {
+    type: Number,
+    default: 5
+  },
+  currentReviewCount: {
+    type: Number,
+    default: 0
+  },
+  reviewerStats: {
+    totalReviews: { type: Number, default: 0 },
+    averageReviewTime: Number,
+    approvalRate: Number,
+    rejectionRate: Number
+  },
   createdAt: {
     type: Date,
     default: Date.now

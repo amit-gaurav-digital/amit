@@ -67,6 +67,7 @@ try { app.use('/api/auth', require('./routes/auth')); } catch (e) { console.warn
 try { app.use('/api/users', require('./routes/users')); } catch (e) { console.warn('Users route error:', e.message); }
 try { app.use('/api/clients', require('./routes/clients')); } catch (e) { console.warn('Clients route error:', e.message); }
 try { app.use('/api/blogs', require('./routes/blogs')); } catch (e) { console.warn('Blogs route error:', e.message); }
+try { app.use('/api/workflow', require('./routes/workflow')); } catch (e) { console.warn('Workflow route error:', e.message); }
 try { app.use('/api/roles', require('./routes/roles')); } catch (e) { console.warn('Roles route error:', e.message); }
 try { app.use('/api/audit', require('./routes/audit')); } catch (e) { console.warn('Audit route error:', e.message); }
 
