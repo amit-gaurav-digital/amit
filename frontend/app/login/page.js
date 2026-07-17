@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import axios from 'axios';
+import authAPI from '@/lib/auth-api';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -21,11 +21,11 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await axios.post('/api/auth/login', { email, password });
+      const response = await authAPI.login(email, password);
 
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('refreshToken', response.data.refreshToken);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      localStorage.setItem('token', response.token);
+      localStorage.setItem('refreshToken', response.refreshToken);
+      localStorage.setItem('user', JSON.stringify(response.user));
 
       router.push('/dashboard');
     } catch (err) {
@@ -41,7 +41,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await axios.post('/api/auth/forgot-password', { email: resetEmail });
+      await authAPI.forgotPassword(resetEmail);
       setError('');
       alert('If an account with this email exists, you will receive a password reset link');
       setForgotMode(false);
