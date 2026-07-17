@@ -165,7 +165,7 @@ export default function LoginPage() {
           <p className="text-gray-600 text-center text-sm">
             Demo Credentials:
             <br />
-            admin@blog.com / Admin@2024!
+            admin@blog.com / Admin@2024!!
           </p>
         </div>
       </div>
