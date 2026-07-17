@@ -2,182 +2,155 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import DateRangePicker from '@/components/analytics/DateRangePicker';
-import BarChart from '@/components/analytics/BarChart';
-import PieChart from '@/components/analytics/PieChart';
-import TrendChart from '@/components/analytics/TrendChart';
-import MetricsTable from '@/components/analytics/MetricsTable';
-import SegmentFilter from '@/components/analytics/SegmentFilter';
-import ExportModal from '@/components/analytics/ExportModal';
+import Link from 'next/link';
+import GoogleAnalyticsWidget from '@/components/analytics/GoogleAnalyticsWidget';
+import SearchConsoleWidget from '@/components/analytics/SearchConsoleWidget';
+import RealtimeVisitors from '@/components/analytics/RealtimeVisitors';
+import SEOMetrics from '@/components/analytics/SEOMetrics';
+import KeywordRankings from '@/components/analytics/KeywordRankings';
+import TrafficSources from '@/components/analytics/TrafficSources';
 
-export default function BlogAnalyticsDetail() {
+export default function BlogDetailPage() {
   const router = useRouter();
   const params = useParams();
   const blogId = params.blogId;
 
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
-  const [exportOpen, setExportOpen] = useState(false);
-  const [dateRange, setDateRange] = useState({ start: null, end: null });
-  const [filters, setFilters] = useState({});
+  const [blogData, setBlogData] = useState(null);
+  const [analyticsData, setAnalyticsData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [token, setToken] = useState(null);
+  const [dateRange, setDateRange] = useState('30');
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
+    const authToken = localStorage.getItem('token');
+    if (!authToken) {
       router.push('/login');
       return;
     }
+    setToken(authToken);
 
-    const endDate = new Date();
-    const startDate = new Date(endDate.getTime() - 30 * 24 * 60 * 60 * 1000);
-    fetchData(startDate, endDate);
-  }, [router]);
+    if (blogId) {
+      fetchBlogData(blogId, authToken);
+      fetchAnalytics(blogId, dateRange, authToken);
+    }
+  }, [blogId, router]);
 
-  const fetchData = async (startDate, endDate) => {
+  const fetchBlogData = async (id, authToken) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blogs/${id}`, {
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setBlogData(data);
+      }
+    } catch (err) {
+      setError('Failed to fetch blog data');
+    }
+  };
+
+  const fetchAnalytics = async (id, days, authToken) => {
     try {
       setLoading(true);
+      const endDate = new Date();
+      const startDate = new Date(endDate.getTime() - days * 24 * 60 * 60 * 1000);
+
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/analytics/blog/${blogId}/detail?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`,
-        { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } }
+        `${process.env.NEXT_PUBLIC_API_URL}/analytics/dashboard/${id}?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`,
+        {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        }
       );
 
       if (response.ok) {
-        const result = await response.json();
-        setData(result);
-        setDateRange({ start: startDate, end: endDate });
+        const data = await response.json();
+        setAnalyticsData(data);
       }
     } catch (err) {
-      console.error('Error fetching data:', err);
+      setError('Failed to fetch analytics');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDateRangeChange = (start, end) => {
-    fetchData(start, end);
-  };
-
-  const handleExport = async (options) => {
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/analytics/export/${blogId}?startDate=${dateRange.start?.toISOString()}&endDate=${dateRange.end?.toISOString()}&format=${options.format}`,
-        { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } }
-      );
-
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `analytics-${blogId}-${Date.now()}.${options.format}`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      }
-    } catch (error) {
-      throw error;
+  const handleDateRangeChange = (days) => {
+    setDateRange(days);
+    if (token) {
+      fetchAnalytics(blogId, days, token);
     }
   };
+
+  const tabs = [
+    { id: 'overview', label: '📊 Overview', icon: '📊' },
+    { id: 'analytics', label: '📈 Google Analytics', icon: '📈' },
+    { id: 'seo', label: '🔍 Search Console', icon: '🔍' }
+  ];
 
   if (loading) {
     return (
       <div style={{ padding: '30px', textAlign: 'center' }}>
-        <div style={{ fontSize: '24px', marginBottom: '15px' }}>📊</div>
-        <p>Loading analytics...</p>
+        <p>Loading blog details...</p>
       </div>
     );
   }
-
-  if (!data) {
-    return (
-      <div style={{ padding: '30px', textAlign: 'center', color: '#6b7280' }}>
-        <p>No analytics data available</p>
-      </div>
-    );
-  }
-
-  const tabs = [
-    { id: 'overview', label: '📈 Overview' },
-    { id: 'performance', label: '⚡ Performance' },
-    { id: 'engagement', label: '💬 Engagement' },
-    { id: 'geography', label: '🌍 Geography' },
-    { id: 'referrers', label: '🔗 Referrers' },
-    { id: 'growth', label: '📊 Growth' }
-  ];
 
   return (
     <div style={{ padding: '30px' }}>
       <div style={{ marginBottom: '30px' }}>
-        <h1 style={{ margin: '0 0 10px 0', color: '#1f2937' }}>📊 {data.blog?.title || 'Blog'} Analytics</h1>
-        <p style={{ margin: 0, color: '#6b7280', fontSize: '14px' }}>
-          {dateRange.start?.toLocaleDateString()} - {dateRange.end?.toLocaleDateString()}
-        </p>
+        <Link href="/dashboard/analytics" style={{ color: '#3b82f6', textDecoration: 'none' }}>
+          ← Back to All Analytics
+        </Link>
+        <h1 style={{ margin: '15px 0 5px 0', color: '#1f2937' }}>
+          📖 {blogData?.title || 'Blog'}
+        </h1>
+        {blogData?.url && (
+          <p style={{ margin: '5px 0', color: '#6b7280', fontSize: '14px' }}>
+            {blogData.url}
+          </p>
+        )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px', marginBottom: '30px' }}>
-        <DateRangePicker onDateRangeChange={handleDateRangeChange} />
-
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '8px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-          padding: '20px'
-        }}>
-          <button
-            onClick={() => setExportOpen(true)}
-            style={{
-              width: '100%',
-              padding: '10px',
-              backgroundColor: '#10b981',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontWeight: '600'
-            }}
-          >
-            📥 Export Data
-          </button>
-        </div>
+      <div style={{ marginBottom: '20px', maxWidth: '200px' }}>
+        <select
+          value={dateRange}
+          onChange={(e) => handleDateRangeChange(e.target.value)}
+          style={{
+            width: '100%',
+            padding: '10px',
+            border: '1px solid #d1d5db',
+            borderRadius: '6px',
+            fontSize: '14px'
+          }}
+        >
+          <option value="7">Last 7 Days</option>
+          <option value="30">Last 30 Days</option>
+          <option value="90">Last 90 Days</option>
+          <option value="365">Last Year</option>
+        </select>
       </div>
 
-      {/* Summary Metrics */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '20px',
-        marginBottom: '30px'
-      }}>
-        <MetricCard title="Total Views" value={data.summary?.totalViews} icon="👁️" color="#3b82f6" />
-        <MetricCard title="Total Visitors" value={data.summary?.totalVisitors} icon="👥" color="#8b5cf6" />
-        <MetricCard title="Avg Bounce Rate" value={data.summary?.avgBounceRate?.toFixed(1)} icon="🚫" color="#f59e0b" suffix="%" />
-        <MetricCard title="Sessions" value={data.summary?.totalSessions} icon="📌" color="#10b981" />
-      </div>
-
-      {/* Tabs */}
       <div style={{
         display: 'flex',
-        gap: '10px',
-        marginBottom: '30px',
         borderBottom: '1px solid #e5e7eb',
-        overflowX: 'auto'
+        marginBottom: '30px',
+        gap: '30px'
       }}>
         {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             style={{
-              padding: '12px 16px',
+              padding: '15px 0',
               border: 'none',
-              borderBottom: activeTab === tab.id ? '2px solid #3b82f6' : '2px solid transparent',
               backgroundColor: 'transparent',
               color: activeTab === tab.id ? '#3b82f6' : '#6b7280',
+              fontWeight: activeTab === tab.id ? 'bold' : 'normal',
               cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: activeTab === tab.id ? '600' : '500',
-              whiteSpace: 'nowrap'
+              borderBottom: activeTab === tab.id ? '3px solid #3b82f6' : 'none',
+              fontSize: '16px'
             }}
           >
             {tab.label}
@@ -185,85 +158,169 @@ export default function BlogAnalyticsDetail() {
         ))}
       </div>
 
-      {/* Tab Content */}
-      {activeTab === 'overview' && (
-        <div style={{ display: 'grid', gap: '30px' }}>
-          <TrendChart
-            data={data.daily || []}
-            dataKey="views"
-            title="Views Trend"
-            color="#3b82f6"
-            height={300}
-          />
+      {activeTab === 'overview' && analyticsData && (
+        <OverviewTab data={analyticsData} />
+      )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-            <BarChart
-              data={Object.fromEntries(data.deviceBreakdown?.map(d => [d.device, d.views]) || [])}
-              title="Traffic by Device"
-              colors={{ desktop: '#3b82f6', mobile: '#10b981', tablet: '#f59e0b' }}
-            />
+      {activeTab === 'analytics' && (
+        <GoogleAnalyticsTab blogId={blogId} token={token} />
+      )}
 
-            <PieChart
-              data={Object.fromEntries(data.trafficSources?.map(s => [s.source, s.views]) || [])}
-              title="Traffic by Source"
-              colors={{
-                organic: '#10b981',
-                direct: '#3b82f6',
-                referral: '#f59e0b',
-                social: '#8b5cf6',
-                email: '#ec4899',
-                paid: '#14b8a6'
-              }}
-            />
+      {activeTab === 'seo' && (
+        <SearchConsoleTab blogId={blogId} token={token} />
+      )}
+    </div>
+  );
+}
+
+function OverviewTab({ data }) {
+  return (
+    <div>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: '20px',
+        marginBottom: '30px'
+      }}>
+        <MetricCard title="Total Views" value={data.totalViews} icon="👁️" color="#3b82f6" />
+        <MetricCard title="Total Visitors" value={data.totalVisitors} icon="👥" color="#8b5cf6" />
+        <MetricCard title="Avg Engagement" value={(data.avgEngagementScore?.toFixed(1) || 0)} icon="💬" color="#10b981" suffix="%" />
+        <MetricCard title="Bounce Rate" value={(data.avgBounceRate?.toFixed(1) || 0)} icon="🚫" color="#f59e0b" suffix="%" />
+      </div>
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '2fr 1fr',
+        gap: '20px'
+      }}>
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '8px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          padding: '20px'
+        }}>
+          <h3 style={{ margin: '0 0 20px 0', color: '#1f2937' }}>📈 Views Trend</h3>
+          <div style={{ height: '250px', display: 'flex', alignItems: 'flex-end', gap: '6px' }}>
+            {data.dailyTrend && data.dailyTrend.length > 0 ? (
+              data.dailyTrend.map((day, idx) => {
+                const maxViews = Math.max(...data.dailyTrend.map(d => d.views));
+                const height = (day.views / maxViews) * 200;
+                return (
+                  <div
+                    key={idx}
+                    style={{
+                      flex: 1,
+                      height: `${height}px`,
+                      backgroundColor: '#3b82f6',
+                      borderRadius: '3px'
+                    }}
+                    title={`${day.date}: ${day.views} views`}
+                  />
+                );
+              })
+            ) : (
+              <p>No data</p>
+            )}
           </div>
-
-          <MetricsTable
-            data={data.topPages || []}
-            columns={[
-              { key: 'url', label: 'Page URL' },
-              { key: 'events', label: 'Events', align: 'right' }
-            ]}
-            title="Top Pages"
-          />
         </div>
-      )}
 
-      {activeTab === 'performance' && (
-        <div style={{ color: '#6b7280', textAlign: 'center', padding: '40px' }}>
-          <p>Performance metrics loading...</p>
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '8px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          padding: '20px'
+        }}>
+          <h3 style={{ margin: '0 0 15px 0', color: '#1f2937', fontSize: '16px' }}>🔝 Top Pages</h3>
+          {data.topPages && data.topPages.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {data.topPages.slice(0, 4).map((page, idx) => (
+                <div key={idx} style={{
+                  padding: '8px',
+                  backgroundColor: '#f9fafb',
+                  borderRadius: '4px',
+                  fontSize: '13px',
+                  borderLeft: '3px solid #3b82f6'
+                }}>
+                  <p style={{ margin: '0 0 4px 0', fontWeight: '500', color: '#1f2937' }}>
+                    {page.url?.split('/').pop() || 'Page'}
+                  </p>
+                  <p style={{ margin: 0, color: '#6b7280', fontSize: '12px' }}>
+                    {page.totalEvents} events
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p style={{ color: '#6b7280' }}>No data</p>
+          )}
         </div>
-      )}
+      </div>
+    </div>
+  );
+}
 
-      {activeTab === 'engagement' && (
-        <div style={{ color: '#6b7280', textAlign: 'center', padding: '40px' }}>
-          <p>Engagement analysis loading...</p>
+function GoogleAnalyticsTab({ blogId, token }) {
+  return (
+    <div>
+      <div style={{ marginBottom: '30px' }}>
+        <GoogleAnalyticsWidget blogId={blogId} token={token} />
+      </div>
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '20px',
+        marginBottom: '30px'
+      }}>
+        <RealtimeVisitors blogId={blogId} token={token} />
+        <TrafficSources blogId={blogId} token={token} />
+      </div>
+
+      <div style={{ marginBottom: '30px' }}>
+        <KeywordRankings blogId={blogId} token={token} />
+      </div>
+    </div>
+  );
+}
+
+function SearchConsoleTab({ blogId, token }) {
+  return (
+    <div>
+      <div style={{ marginBottom: '30px' }}>
+        <SearchConsoleWidget blogId={blogId} token={token} />
+      </div>
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '20px',
+        marginBottom: '30px'
+      }}>
+        <SEOMetrics blogId={blogId} token={token} />
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '8px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          padding: '20px'
+        }}>
+          <h3 style={{ margin: '0 0 20px 0', color: '#1f2937' }}>📚 About Search Console</h3>
+          <p style={{ margin: '0 0 15px 0', color: '#6b7280', fontSize: '14px' }}>
+            Search Console data shows your website's performance in Google Search.
+          </p>
+          <Link href="/dashboard/settings/integrations/search-console" style={{
+            color: '#3b82f6',
+            textDecoration: 'none',
+            fontSize: '14px',
+            fontWeight: '500'
+          }}>
+            🔧 Manage Settings →
+          </Link>
         </div>
-      )}
+      </div>
 
-      {activeTab === 'geography' && (
-        <div style={{ color: '#6b7280', textAlign: 'center', padding: '40px' }}>
-          <p>Geographic data loading...</p>
-        </div>
-      )}
-
-      {activeTab === 'referrers' && (
-        <div style={{ color: '#6b7280', textAlign: 'center', padding: '40px' }}>
-          <p>Referrer analysis loading...</p>
-        </div>
-      )}
-
-      {activeTab === 'growth' && (
-        <div style={{ color: '#6b7280', textAlign: 'center', padding: '40px' }}>
-          <p>Growth comparison loading...</p>
-        </div>
-      )}
-
-      <ExportModal
-        isOpen={exportOpen}
-        onClose={() => setExportOpen(false)}
-        onExport={handleExport}
-        blogId={blogId}
-      />
+      <div>
+        <KeywordRankings blogId={blogId} token={token} />
+      </div>
     </div>
   );
 }
@@ -277,17 +334,13 @@ function MetricCard({ title, value, icon, color, suffix = '' }) {
       padding: '20px',
       borderLeft: `4px solid ${color}`
     }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-        <div>
-          <p style={{ margin: '0 0 10px 0', color: '#6b7280', fontSize: '13px', fontWeight: '500' }}>
-            {title}
-          </p>
-          <p style={{ margin: 0, fontSize: '28px', fontWeight: '700', color }}>
-            {typeof value === 'number' ? value.toLocaleString() : value}{suffix}
-          </p>
-        </div>
-        <div style={{ fontSize: '24px' }}>{icon}</div>
-      </div>
+      <p style={{ margin: '0 0 10px 0', color: '#6b7280', fontSize: '13px', fontWeight: '500' }}>
+        {title}
+      </p>
+      <p style={{ margin: 0, fontSize: '32px', fontWeight: '700', color }}>
+        {typeof value === 'number' ? value.toLocaleString() : value}{suffix}
+      </p>
+      <p style={{ margin: '10px 0 0 0', fontSize: '20px' }}>{icon}</p>
     </div>
   );
 }
