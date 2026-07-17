@@ -70,6 +70,7 @@ try { app.use('/api/blogs', require('./routes/blogs')); } catch (e) { console.wa
 try { app.use('/api/workflow', require('./routes/workflow')); } catch (e) { console.warn('Workflow route error:', e.message); }
 try { app.use('/api/roles', require('./routes/roles')); } catch (e) { console.warn('Roles route error:', e.message); }
 try { app.use('/api/audit', require('./routes/audit')); } catch (e) { console.warn('Audit route error:', e.message); }
+try { app.use('/api/ai', require('./routes/ai')); } catch (e) { console.warn('AI route error:', e.message); }
 
 // Load feature routes if they exist
 try { app.use('/api/translation', require('./routes/translation')); } catch (e) {}

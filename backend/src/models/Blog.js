@@ -111,6 +111,32 @@ const blogSchema = new mongoose.Schema({
     enum: ['pending', 'approved', 'rejected', 'changes_requested'],
     default: 'pending'
   },
+  // AI Generation Integration
+  aiGenerated: {
+    type: Boolean,
+    default: false
+  },
+  generatedBy: {
+    generationRequestId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'AIGenerationRequest'
+    },
+    model: String,
+    temperature: Number,
+    tokensUsed: Number,
+    costUsd: Number,
+    generatedAt: Date
+  },
+  aiQualityMetrics: {
+    readabilityScore: { type: Number, min: 0, max: 100 },
+    seoScore: { type: Number, min: 0, max: 100 },
+    plagiarismScore: { type: Number, min: 0, max: 100 },
+    overallQuality: { type: Number, min: 0, max: 100 }
+  },
+  variants: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'AIBlogVariant'
+  }],
   createdAt: {
     type: Date,
     default: Date.now
