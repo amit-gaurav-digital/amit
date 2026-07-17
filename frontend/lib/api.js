@@ -7,11 +7,10 @@ const getAuthHeader = () => {
   return { Authorization: `Bearer ${token}` };
 };
 
-const abTestingAPI = {
-  getTests: async (blogId) => {
+const blogAPI = {
+  getBlogs: async () => {
     try {
-      const response = await axios.get(`${API_BASE}/ab-tests`, {
-        params: { blogId },
+      const response = await axios.get(`${API_BASE}/blogs`, {
         headers: getAuthHeader()
       });
       return response.data;
@@ -20,9 +19,9 @@ const abTestingAPI = {
     }
   },
 
-  getTest: async (testId) => {
+  getBlog: async (blogId) => {
     try {
-      const response = await axios.get(`${API_BASE}/ab-tests/${testId}`, {
+      const response = await axios.get(`${API_BASE}/blogs/${blogId}`, {
         headers: getAuthHeader()
       });
       return response.data;
@@ -31,11 +30,11 @@ const abTestingAPI = {
     }
   },
 
-  createTest: async (blogId, title, description, variants) => {
+  createBlog: async (title, description) => {
     try {
       const response = await axios.post(
-        `${API_BASE}/ab-tests`,
-        { blogId, title, description, variants },
+        `${API_BASE}/blogs`,
+        { title, description },
         { headers: getAuthHeader() }
       );
       return response.data;
@@ -44,10 +43,10 @@ const abTestingAPI = {
     }
   },
 
-  updateTest: async (testId, data) => {
+  updateBlog: async (blogId, data) => {
     try {
       const response = await axios.put(
-        `${API_BASE}/ab-tests/${testId}`,
+        `${API_BASE}/blogs/${blogId}`,
         data,
         { headers: getAuthHeader() }
       );
@@ -57,23 +56,10 @@ const abTestingAPI = {
     }
   },
 
-  endTest: async (testId) => {
-    try {
-      const response = await axios.post(
-        `${API_BASE}/ab-tests/${testId}/end`,
-        {},
-        { headers: getAuthHeader() }
-      );
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  deleteTest: async (testId) => {
+  deleteBlog: async (blogId) => {
     try {
       const response = await axios.delete(
-        `${API_BASE}/ab-tests/${testId}`,
+        `${API_BASE}/blogs/${blogId}`,
         { headers: getAuthHeader() }
       );
       return response.data;
@@ -83,4 +69,4 @@ const abTestingAPI = {
   }
 };
 
-export default abTestingAPI;
+export default blogAPI;
