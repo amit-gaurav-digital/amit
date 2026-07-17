@@ -78,15 +78,19 @@ export default function MultiSelectBlogs({ blogs, token, onSelect }) {
   };
 
   const getStatusColor = (status) => {
-    if (status?.gaEnabled) return '#10b981';
-    if (status?.scEnabled) return '#3b82f6';
+    if (status?.googleAnalytics?.connected && status?.searchConsole?.connected) return '#10b981';
+    if (status?.googleAnalytics?.connected) return '#3b82f6';
+    if (status?.searchConsole?.connected) return '#8b5cf6';
     return '#d1d5db';
   };
 
   const getStatusText = (status) => {
-    if (status?.gaEnabled && status?.scEnabled) return 'GA & SC';
-    if (status?.gaEnabled) return 'GA Only';
-    if (status?.scEnabled) return 'SC Only';
+    const gaConnected = status?.googleAnalytics?.connected === true;
+    const scConnected = status?.searchConsole?.connected === true;
+
+    if (gaConnected && scConnected) return 'GA & SC';
+    if (gaConnected) return 'GA Only';
+    if (scConnected) return 'SC Only';
     return 'Not Connected';
   };
 
@@ -274,21 +278,21 @@ export default function MultiSelectBlogs({ blogs, token, onSelect }) {
                       {getStatusText(status)}
                     </span>
 
-                    {status?.gaLastSyncAt && (
+                    {status?.googleAnalytics?.connected && status?.googleAnalytics?.lastSync && (
                       <span style={{
                         fontSize: '11px',
                         color: '#6b7280'
                       }}>
-                        GA: {formatLastSync(status.gaLastSyncAt)}
+                        GA: {formatLastSync(status.googleAnalytics.lastSync)}
                       </span>
                     )}
 
-                    {status?.scLastSyncAt && (
+                    {status?.searchConsole?.connected && status?.searchConsole?.lastSync && (
                       <span style={{
                         fontSize: '11px',
                         color: '#6b7280'
                       }}>
-                        SC: {formatLastSync(status.scLastSyncAt)}
+                        SC: {formatLastSync(status.searchConsole.lastSync)}
                       </span>
                     )}
                   </div>
