@@ -63,30 +63,14 @@ app.use('/api/users', require('./routes/users'));
 app.use('/api/roles', require('./routes/roles'));
 app.use('/api/audit', require('./routes/audit'));
 
-if (require('./routes/topics')) {
-  app.use('/api/topics', require('./routes/topics'));
-}
-if (require('./routes/research')) {
-  app.use('/api/research', require('./routes/research'));
-}
-if (require('./routes/blogs')) {
-  app.use('/api/blogs', require('./routes/blogs'));
-}
-if (require('./routes/approval')) {
-  app.use('/api/approval', require('./routes/approval'));
-}
-if (require('./routes/publishing')) {
-  app.use('/api/publishing', require('./routes/publishing'));
-}
-if (require('./routes/workflow')) {
-  app.use('/api/workflow', require('./routes/workflow'));
-}
-if (require('./routes/scheduler')) {
-  app.use('/api/scheduler', require('./routes/scheduler'));
-}
-if (require('./routes/advanced')) {
-  app.use('/api/advanced', require('./routes/advanced'));
-}
+// Load feature routes if they exist
+try { app.use('/api/translation', require('./routes/translation')); } catch (e) {}
+try { app.use('/api/social-media', require('./routes/socialMedia')); } catch (e) {}
+try { app.use('/api/email-notifications', require('./routes/emailNotifications')); } catch (e) {}
+try { app.use('/api/rate-limit', require('./routes/rateLimit')); } catch (e) {}
+try { app.use('/api/cache', require('./routes/cache')); } catch (e) {}
+try { app.use('/api/custom-domain', require('./routes/customDomain')); } catch (e) {}
+try { app.use('/api/subscription', require('./routes/subscription')); } catch (e) {}
 
 app.use((err, req, res, next) => {
   console.error('Error:', err);
