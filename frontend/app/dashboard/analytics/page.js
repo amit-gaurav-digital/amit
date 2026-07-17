@@ -194,43 +194,174 @@ export default function AnalyticsDashboard() {
         </div>
       </div>
 
-      {/* Comparison Card */}
-      {blogs.length >= 2 && (
+      {/* Comparison Card - Always visible */}
+      <div style={{
+        backgroundColor: blogs.length >= 2 ? '#f0f9ff' : '#fef3c7',
+        border: `2px solid ${blogs.length >= 2 ? '#bfdbfe' : '#fcd34d'}`,
+        borderRadius: '8px',
+        padding: '20px',
+        marginBottom: '30px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: '16px'
+      }}>
+        <div>
+          <h3 style={{ margin: '0 0 5px 0', color: blogs.length >= 2 ? '#1e40af' : '#92400e', fontSize: '16px', fontWeight: 'bold' }}>
+            🔄 Compare Multiple Blogs
+          </h3>
+          <p style={{ margin: 0, color: blogs.length >= 2 ? '#0c4a6e' : '#b45309', fontSize: '14px' }}>
+            {blogs.length >= 2
+              ? 'Analyze performance metrics side-by-side across up to 5 blogs'
+              : `Create at least 2 blogs to start comparing. You currently have ${blogs.length} blog${blogs.length === 1 ? '' : 's'}.`}
+          </p>
+        </div>
+        <Link href="/dashboard/analytics/compare">
+          <button style={{
+            padding: '10px 24px',
+            backgroundColor: blogs.length >= 2 ? '#0ea5e9' : '#d97706',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontWeight: '600',
+            fontSize: '14px',
+            whiteSpace: 'nowrap',
+            opacity: blogs.length >= 2 ? 1 : 0.7
+          }}>
+            {blogs.length >= 2 ? 'Start Comparison →' : 'View Comparison Tool →'}
+          </button>
+        </Link>
+      </div>
+
+      {/* Phase 2 Features Showcase - Always visible */}
+      {!data && (
         <div style={{
-          backgroundColor: '#f0f9ff',
-          border: '2px solid #bfdbfe',
+          backgroundColor: '#f3f4f6',
           borderRadius: '8px',
-          padding: '20px',
-          marginBottom: '30px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '16px'
+          padding: '30px',
+          marginBottom: '30px'
         }}>
-          <div>
-            <h3 style={{ margin: '0 0 5px 0', color: '#1e40af', fontSize: '16px', fontWeight: 'bold' }}>
-              🔄 Compare Multiple Blogs
-            </h3>
-            <p style={{ margin: 0, color: '#0c4a6e', fontSize: '14px' }}>
-              Analyze performance metrics side-by-side across up to 5 blogs
-            </p>
-          </div>
-          <Link href="/dashboard/analytics/compare">
-            <button style={{
-              padding: '10px 24px',
-              backgroundColor: '#0ea5e9',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontWeight: '600',
-              fontSize: '14px',
-              whiteSpace: 'nowrap'
+          <h2 style={{ margin: '0 0 20px 0', color: '#1f2937', fontSize: '20px', fontWeight: 'bold' }}>
+            📊 Phase 2: Google Analytics & Comparison Features
+          </h2>
+          <p style={{ margin: '0 0 20px 0', color: '#6b7280', fontSize: '14px' }}>
+            Unlock advanced analytics and blog comparison capabilities with Google integration
+          </p>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gap: '20px'
+          }}>
+            {/* Feature 1 */}
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              padding: '16px',
+              border: '1px solid #e5e7eb',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px'
             }}>
-              Start Comparison →
-            </button>
-          </Link>
+              <div style={{ fontSize: '24px' }}>📈</div>
+              <h4 style={{ margin: 0, color: '#1f2937', fontWeight: '600' }}>Google Analytics</h4>
+              <p style={{ margin: 0, color: '#6b7280', fontSize: '13px' }}>
+                Real-time metrics from Google Analytics 4
+              </p>
+              <Link href="/dashboard/settings/integrations/google-analytics" style={{ textDecoration: 'none' }}>
+                <button style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#3b82f6',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: '500',
+                  marginTop: '8px'
+                }}>
+                  Configure
+                </button>
+              </Link>
+            </div>
+
+            {/* Feature 2 */}
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              padding: '16px',
+              border: '1px solid #e5e7eb',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px'
+            }}>
+              <div style={{ fontSize: '24px' }}>🔍</div>
+              <h4 style={{ margin: 0, color: '#1f2937', fontWeight: '600' }}>Search Console</h4>
+              <p style={{ margin: 0, color: '#6b7280', fontSize: '13px' }}>
+                SEO metrics and keyword performance
+              </p>
+              <Link href="/dashboard/settings/integrations/search-console" style={{ textDecoration: 'none' }}>
+                <button style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#8b5cf6',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: '500',
+                  marginTop: '8px'
+                }}>
+                  Configure
+                </button>
+              </Link>
+            </div>
+
+            {/* Feature 3 */}
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              padding: '16px',
+              border: '1px solid #e5e7eb',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px'
+            }}>
+              <div style={{ fontSize: '24px' }}>📊</div>
+              <h4 style={{ margin: 0, color: '#1f2937', fontWeight: '600' }}>Blog Comparison</h4>
+              <p style={{ margin: 0, color: '#6b7280', fontSize: '13px' }}>
+                Compare metrics across multiple blogs
+              </p>
+              <Link href="/dashboard/analytics/compare" style={{ textDecoration: 'none' }}>
+                <button style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#10b981',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: '500',
+                  marginTop: '8px'
+                }}>
+                  Explore
+                </button>
+              </Link>
+            </div>
+          </div>
+
+          <div style={{
+            marginTop: '20px',
+            padding: '16px',
+            backgroundColor: '#dbeafe',
+            borderRadius: '6px',
+            border: '1px solid #93c5fd',
+            color: '#1e40af'
+          }}>
+            <strong>👉 Getting Started:</strong> Create a blog first, then configure Google Analytics in Settings to start seeing real-time analytics data.
+          </div>
         </div>
       )}
 
