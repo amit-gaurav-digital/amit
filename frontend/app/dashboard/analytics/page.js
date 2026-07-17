@@ -177,9 +177,62 @@ export default function AnalyticsDashboard() {
                 View Detailed →
               </button>
             </Link>
+            <Link href="/dashboard/analytics/compare">
+              <button style={{
+                padding: '10px 20px',
+                backgroundColor: '#8b5cf6',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: '500'
+              }}>
+                📊 Compare Blogs
+              </button>
+            </Link>
           </div>
         </div>
       </div>
+
+      {/* Comparison Card */}
+      {blogs.length >= 2 && (
+        <div style={{
+          backgroundColor: '#f0f9ff',
+          border: '2px solid #bfdbfe',
+          borderRadius: '8px',
+          padding: '20px',
+          marginBottom: '30px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '16px'
+        }}>
+          <div>
+            <h3 style={{ margin: '0 0 5px 0', color: '#1e40af', fontSize: '16px', fontWeight: 'bold' }}>
+              🔄 Compare Multiple Blogs
+            </h3>
+            <p style={{ margin: 0, color: '#0c4a6e', fontSize: '14px' }}>
+              Analyze performance metrics side-by-side across up to 5 blogs
+            </p>
+          </div>
+          <Link href="/dashboard/analytics/compare">
+            <button style={{
+              padding: '10px 24px',
+              backgroundColor: '#0ea5e9',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontWeight: '600',
+              fontSize: '14px',
+              whiteSpace: 'nowrap'
+            }}>
+              Start Comparison →
+            </button>
+          </Link>
+        </div>
+      )}
 
       {data && selectedBlog && token ? (
         <>
