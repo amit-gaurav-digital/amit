@@ -31,13 +31,15 @@ const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/ai-bloggi
 
 mongoose.connect(mongoUri, {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
+  connectTimeoutMS: 5000,
+  serverSelectionTimeoutMS: 5000
 }).then(() => {
   console.log('Connected to MongoDB');
   initializeRoles();
 }).catch(err => {
-  console.error('MongoDB connection error:', err);
-  process.exit(1);
+  console.warn('MongoDB connection warning:', err.message);
+  console.log('Server will continue without database');
 });
 
 async function initializeRoles() {
