@@ -87,6 +87,7 @@ export default function Dashboard() {
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <NavLink href="/dashboard" icon="📊" label="Dashboard" open={sidebarOpen} active />
           <NavLink href="/dashboard/blogs" icon="📝" label="Blogs" open={sidebarOpen} />
+          <NavLink href="/dashboard/ai/generator" icon="✨" label="AI Generator" open={sidebarOpen} />
           <NavLink href="/dashboard/schedule" icon="📅" label="Schedule" open={sidebarOpen} />
           <NavLink href="/dashboard/analytics" icon="📈" label="Analytics" open={sidebarOpen} />
           <NavLink href="/dashboard/settings" icon="⚙️" label="Settings" open={sidebarOpen} />
@@ -130,6 +131,19 @@ export default function Dashboard() {
             </p>
           </div>
           <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+            <Link href="/dashboard/ai/generator">
+              <button style={{
+                padding: '10px 20px',
+                backgroundColor: '#8b5cf6',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: '500'
+              }}>
+                ✨ AI Generator
+              </button>
+            </Link>
             <Link href="/dashboard/blogs/create">
               <button style={{
                 padding: '10px 20px',
@@ -160,6 +174,31 @@ export default function Dashboard() {
 
         {/* Dashboard Content */}
         <div style={{ padding: '30px' }}>
+          {/* AI Features Quick Access */}
+          <div style={{
+            backgroundColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            borderRadius: '12px',
+            padding: '25px',
+            marginBottom: '30px',
+            color: 'white'
+          }}>
+            <h3 style={{ margin: '0 0 20px 0', fontSize: '18px', fontWeight: '600' }}>
+              ✨ AI Content Generation
+            </h3>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+              gap: '12px'
+            }}>
+              <AIFeatureLink href="/dashboard/ai/generator" label="Generate" icon="✨" />
+              <AIFeatureLink href="/dashboard/ai/refine" label="Refine" icon="🔧" />
+              <AIFeatureLink href="/dashboard/ai/variants" label="Variants" icon="🔄" />
+              <AIFeatureLink href="/dashboard/ai/usage" label="Usage" icon="📊" />
+              <AIFeatureLink href="/dashboard/ai/history" label="History" icon="📋" />
+              <AIFeatureLink href="/dashboard/ai/settings" label="Settings" icon="⚙️" />
+            </div>
+          </div>
+
           {/* Stats Grid */}
           <div style={{
             display: 'grid',
@@ -331,6 +370,27 @@ function NavLink({ href, icon, label, open, active }) {
       }}>
         <span style={{ fontSize: '18px' }}>{icon}</span>
         {open && <span>{label}</span>}
+      </div>
+    </Link>
+  );
+}
+
+function AIFeatureLink({ href, label, icon }) {
+  return (
+    <Link href={href}>
+      <div style={{
+        padding: '15px',
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: '8px',
+        textAlign: 'center',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        border: '1px solid rgba(255, 255, 255, 0.2)',
+        textDecoration: 'none',
+        color: 'white'
+      }}>
+        <div style={{ fontSize: '24px', marginBottom: '8px' }}>{icon}</div>
+        <div style={{ fontSize: '13px', fontWeight: '600' }}>{label}</div>
       </div>
     </Link>
   );
