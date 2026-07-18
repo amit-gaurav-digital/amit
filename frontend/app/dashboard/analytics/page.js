@@ -585,8 +585,6 @@ export default function AnalyticsDashboard() {
               <KeywordRankings blogId={selectedBlog} token={token} />
             </div>
           </div>
-        </>
-      ) : null}
 
           {/* Charts Section */}
           <div style={{
