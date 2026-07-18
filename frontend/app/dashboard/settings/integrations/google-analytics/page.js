@@ -114,28 +114,39 @@ function GoogleAnalyticsContent() {
   const handleOAuthCallback = async (code) => {
     if (!selectedBlog) return;
 
+    setLoading(true);
+    console.log('Processing OAuth callback with code:', code);
+    console.log('Selected blog:', selectedBlog._id);
+
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/integrations/google-analytics/connect/${selectedBlog._id}`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ code })
-        }
-      );
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/integrations/google-analytics/connect/${selectedBlog._id}`;
+      console.log('Calling API endpoint:', url);
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ code })
+      });
+
+      const data = await response.json();
+      console.log('API Response:', response.status, data);
 
       if (response.ok) {
         setError(null);
-        fetchIntegrationStatus(selectedBlog._id);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        await fetchIntegrationStatus(selectedBlog._id);
         window.history.replaceState({}, document.title, window.location.pathname);
       } else {
-        setError('Failed to connect Google Analytics');
+        setError(`Failed to connect: ${data.error || 'Unknown error'}`);
       }
     } catch (err) {
-      setError('OAuth callback failed');
+      console.error('OAuth callback error:', err);
+      setError(`OAuth callback failed: ${err.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
