@@ -15,6 +15,7 @@ function GoogleAnalyticsContent() {
   const [syncing, setSyncing] = useState(false);
   const [syncHistory, setSyncHistory] = useState([]);
   const [error, setError] = useState(null);
+  const [oauthCode, setOauthCode] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -25,10 +26,10 @@ function GoogleAnalyticsContent() {
 
     fetchBlogs();
 
-    // Check for OAuth callback
+    // Extract OAuth code from URL
     const code = searchParams.get('code');
     if (code) {
-      handleOAuthCallback(code);
+      setOauthCode(code);
     }
   }, []);
 
@@ -37,6 +38,13 @@ function GoogleAnalyticsContent() {
       fetchIntegrationStatus(selectedBlog._id);
     }
   }, [selectedBlog]);
+
+  // Handle OAuth callback when both code and blog are ready
+  useEffect(() => {
+    if (oauthCode && selectedBlog) {
+      handleOAuthCallback(oauthCode);
+    }
+  }, [oauthCode, selectedBlog]);
 
   const fetchBlogs = async () => {
     try {
@@ -115,6 +123,9 @@ function GoogleAnalyticsContent() {
     if (!selectedBlog) return;
 
     try {
+      console.log('Processing OAuth callback with code:', code);
+      console.log('Selected blog ID:', selectedBlog._id);
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/integrations/google-analytics/connect/${selectedBlog._id}`,
         {
@@ -127,15 +138,21 @@ function GoogleAnalyticsContent() {
         }
       );
 
+      const data = await response.json();
+      console.log('OAuth response:', response.status, data);
+
       if (response.ok) {
         setError(null);
-        fetchIntegrationStatus(selectedBlog._id);
+        // Delay status fetch to ensure backend has updated
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        await fetchIntegrationStatus(selectedBlog._id);
         window.history.replaceState({}, document.title, window.location.pathname);
       } else {
-        setError('Failed to connect Google Analytics');
+        setError(`Failed to connect: ${data.error || 'Unknown error'}`);
       }
     } catch (err) {
-      setError('OAuth callback failed');
+      console.error('OAuth callback error:', err);
+      setError(`OAuth callback failed: ${err.message}`);
     }
   };
 
