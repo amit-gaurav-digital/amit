@@ -28,12 +28,17 @@ function GoogleAnalyticsContent() {
 
     // Extract OAuth code from URL
     const code = searchParams.get('code');
+    console.log('Initial setup: OAuth code from URL:', code ? code.substring(0, 20) + '...' : 'NOT FOUND');
     if (code) {
+      console.log('Setting oauthCode state');
       setOauthCode(code);
+    } else {
+      console.log('No OAuth code in URL');
     }
   }, []);
 
   useEffect(() => {
+    console.log('selectedBlog changed:', selectedBlog ? selectedBlog._id : 'null');
     if (selectedBlog) {
       fetchIntegrationStatus(selectedBlog._id);
     }
@@ -41,7 +46,14 @@ function GoogleAnalyticsContent() {
 
   // Handle OAuth callback when both code and blog are ready
   useEffect(() => {
+    console.log('OAuth Effect: Checking conditions', {
+      oauthCode: !!oauthCode,
+      selectedBlog: !!selectedBlog,
+      blogId: selectedBlog?._id
+    });
+
     if (oauthCode && selectedBlog) {
+      console.log('OAuth Effect: Both code and blog ready, calling handleOAuthCallback');
       handleOAuthCallback(oauthCode);
     }
   }, [oauthCode, selectedBlog]);
@@ -70,15 +82,21 @@ function GoogleAnalyticsContent() {
 
   const fetchIntegrationStatus = async (blogId) => {
     try {
+      console.log('Fetching integration status for blog:', blogId);
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/integrations/status/${blogId}`,
         {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         }
       );
+      console.log('Status fetch response:', response.status);
+
       if (response.ok) {
         const data = await response.json();
+        console.log('Integration status data:', data);
         setIntegrationStatus(data);
+      } else {
+        console.error('Status fetch failed with status:', response.status);
       }
     } catch (err) {
       console.error('Error fetching status:', err);
@@ -120,35 +138,54 @@ function GoogleAnalyticsContent() {
   };
 
   const handleOAuthCallback = async (code) => {
-    if (!selectedBlog) return;
+    console.log('handleOAuthCallback called with code:', code?.substring(0, 20) + '...');
+    console.log('selectedBlog check:', selectedBlog ? 'Blog loaded' : 'Blog NOT loaded');
+
+    if (!selectedBlog) {
+      console.log('No selectedBlog, returning early');
+      return;
+    }
 
     try {
-      console.log('Processing OAuth callback with code:', code);
+      console.log('Processing OAuth callback with code:', code?.substring(0, 20) + '...');
       console.log('Selected blog ID:', selectedBlog._id);
+      console.log('API URL:', process.env.NEXT_PUBLIC_API_URL);
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/integrations/google-analytics/connect/${selectedBlog._id}`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ code })
-        }
-      );
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/integrations/google-analytics/connect/${selectedBlog._id}`;
+      console.log('Making POST request to:', url);
 
-      const data = await response.json();
-      console.log('OAuth response:', response.status, data);
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ code })
+      });
+
+      console.log('POST request completed, status:', response.status);
+
+      let data;
+      try {
+        data = await response.json();
+        console.log('OAuth response data:', data);
+      } catch (parseErr) {
+        console.error('Failed to parse response JSON:', parseErr);
+        data = { error: 'Invalid response format' };
+      }
 
       if (response.ok) {
+        console.log('OAuth connection successful, fetching status...');
         setError(null);
         // Delay status fetch to ensure backend has updated
         await new Promise(resolve => setTimeout(resolve, 1000));
         await fetchIntegrationStatus(selectedBlog._id);
         window.history.replaceState({}, document.title, window.location.pathname);
+        console.log('OAuth process complete');
       } else {
-        setError(`Failed to connect: ${data.error || 'Unknown error'}`);
+        const errorMsg = `Failed to connect: ${data.error || 'Unknown error'} (Status: ${response.status})`;
+        console.error('OAuth connection failed:', errorMsg);
+        setError(errorMsg);
       }
     } catch (err) {
       console.error('OAuth callback error:', err);
