@@ -27,19 +27,30 @@ export default function BlogsPage() {
         ...(filters.search && { search: filters.search })
       });
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/blogs?${query}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/blogs?${query}`;
+      console.log('Fetching blogs from:', url);
+      console.log('API_URL env:', process.env.NEXT_PUBLIC_API_URL);
+
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
-      );
+      });
+
+      console.log('Response status:', response.status);
+      console.log('Response headers:', {
+        contentType: response.headers.get('content-type'),
+        contentLength: response.headers.get('content-length')
+      });
 
       if (response.ok) {
         const data = await response.json();
+        console.log('Blogs data received:', data);
         setBlogs(data.blogs);
         setTotal(data.pagination.total);
+      } else {
+        const errorData = await response.json();
+        console.error('API error response:', errorData);
       }
     } catch (error) {
       console.error('Error fetching blogs:', error);
