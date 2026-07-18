@@ -100,24 +100,39 @@ router.post('/google-analytics/connect/:blogId', authorizationService.requireAut
     const { blogId } = req.params;
     const { code } = req.body;
 
+    console.log('GA Connect endpoint called:', {
+      blogId,
+      userId: req.user.userId,
+      codeLength: code?.length,
+      hasCode: !!code
+    });
+
     if (!code) {
+      console.error('No authorization code provided');
       return res.status(400).json({ error: 'Authorization code required' });
     }
 
     // Exchange code for tokens
+    console.log('Exchanging OAuth code for tokens...');
     const tokens = await googleAnalyticsService.exchangeCodeForToken(code);
+    console.log('Token exchange successful, tokens received');
 
     // Get list of properties
+    console.log('Fetching Google Analytics properties...');
     const properties = await googleAnalyticsService.getProperties(tokens.access_token);
+    console.log('Properties fetched:', properties.length);
 
     if (properties.length === 0) {
+      console.error('No analytics properties found for this account');
       return res.status(400).json({ error: 'No analytics properties found' });
     }
 
     // Use the first property (user should select in UI in future)
     const property = properties[0];
+    console.log('Using first property:', property.displayName);
 
     // Connect in database
+    console.log('Saving connection to database...');
     const result = await integrationManager.connectGoogleAnalytics(
       req.user.userId,
       blogId,
@@ -132,9 +147,13 @@ router.post('/google-analytics/connect/:blogId', authorizationService.requireAut
       }
     );
 
+    console.log('Connection saved successfully');
     res.json({ success: true, ...result });
   } catch (error) {
-    console.error('GA connection error:', error.message);
+    console.error('GA connection error:', {
+      message: error.message,
+      stack: error.stack
+    });
     res.status(500).json({ error: error.message });
   }
 });

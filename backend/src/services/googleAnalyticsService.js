@@ -28,6 +28,14 @@ class GoogleAnalyticsService {
 
   async exchangeCodeForToken(code) {
     try {
+      console.log('Exchanging OAuth code for token...');
+      console.log('OAuth exchange config:', {
+        redirectUri: this.redirectUri,
+        hasClientId: !!this.clientId,
+        hasClientSecret: !!this.clientSecret,
+        codeLength: code?.length
+      });
+
       const response = await axios.post('https://oauth2.googleapis.com/token', {
         code,
         client_id: this.clientId,
@@ -36,8 +44,19 @@ class GoogleAnalyticsService {
         grant_type: 'authorization_code'
       });
 
+      console.log('Token exchange successful:', {
+        hasAccessToken: !!response.data.access_token,
+        hasRefreshToken: !!response.data.refresh_token,
+        expiresIn: response.data.expires_in
+      });
+
       return response.data;
     } catch (error) {
+      console.error('OAuth token exchange error:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
       throw new Error(`OAuth exchange failed: ${error.message}`);
     }
   }
@@ -59,12 +78,19 @@ class GoogleAnalyticsService {
 
   async getProperties(accessToken) {
     try {
+      console.log('Fetching Google Analytics properties...');
       const response = await axios.get(
         'https://analyticsadmin.googleapis.com/v1beta/properties',
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
+      console.log('Properties fetched successfully:', response.data.properties?.length || 0);
       return response.data.properties || [];
     } catch (error) {
+      console.error('Failed to fetch properties:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data
+      });
       throw new Error(`Failed to fetch properties: ${error.message}`);
     }
   }
