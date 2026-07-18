@@ -33,19 +33,28 @@ class GoogleAnalyticsService {
     try {
       console.log('Exchanging OAuth code for token...');
       console.log('OAuth exchange config:', {
+        clientId: this.clientId,
         redirectUri: this.redirectUri,
-        hasClientId: !!this.clientId,
-        hasClientSecret: !!this.clientSecret,
-        codeLength: code?.length
+        codeLength: code?.length,
+        codePrefix: code?.substring(0, 20)
       });
 
-      const response = await axios.post('https://oauth2.googleapis.com/token', {
+      const tokenRequest = {
         code,
         client_id: this.clientId,
         client_secret: this.clientSecret,
         redirect_uri: this.redirectUri,
         grant_type: 'authorization_code'
+      };
+
+      console.log('Sending token request to Google with:', {
+        client_id: tokenRequest.client_id,
+        redirect_uri: tokenRequest.redirect_uri,
+        grant_type: tokenRequest.grant_type,
+        code_length: tokenRequest.code?.length
       });
+
+      const response = await axios.post('https://oauth2.googleapis.com/token', tokenRequest);
 
       console.log('Token exchange successful:', {
         hasAccessToken: !!response.data.access_token,
@@ -55,10 +64,14 @@ class GoogleAnalyticsService {
 
       return response.data;
     } catch (error) {
-      console.error('OAuth token exchange error:', {
+      console.error('OAuth token exchange ERROR:', {
         message: error.message,
-        response: error.response?.data,
-        status: error.response?.status
+        status: error.response?.status,
+        errorData: error.response?.data,
+        config: {
+          clientId: this.clientId,
+          redirectUri: this.redirectUri
+        }
       });
       throw new Error(`OAuth exchange failed: ${error.message}`);
     }
