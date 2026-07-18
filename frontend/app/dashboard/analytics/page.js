@@ -397,8 +397,7 @@ export default function AnalyticsDashboard() {
               display: 'flex',
               flexDirection: 'column',
               gap: '10px',
-              height: '100%',
-              ':hover': { boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }
+              height: '100%'
             }}
             onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'}
             onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}>
