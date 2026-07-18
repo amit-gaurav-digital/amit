@@ -24,17 +24,17 @@ function GoogleAnalyticsContent() {
     }
 
     fetchBlogs();
-
-    // Check for OAuth callback
-    const code = searchParams.get('code');
-    if (code) {
-      handleOAuthCallback(code);
-    }
   }, []);
 
   useEffect(() => {
     if (selectedBlog) {
       fetchIntegrationStatus(selectedBlog._id);
+
+      // Check for OAuth callback and process after blog is selected
+      const code = searchParams.get('code');
+      if (code) {
+        handleOAuthCallback(code);
+      }
     }
   }, [selectedBlog]);
 
