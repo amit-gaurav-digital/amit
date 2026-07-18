@@ -20,7 +20,9 @@ function createSlug(title, clientId) {
 router.get('/', authorizationService.requireAuth, async (req, res) => {
   try {
     const { status, category, page = 1, limit = 20, sortBy = 'createdAt', order = 'desc', search } = req.query;
-    const clientId = req.query.clientId || req.user.clientId;
+    const clientId = req.query.clientId || req.user.userId;
+
+    console.log('GET /blogs - clientId:', clientId, 'req.user:', req.user);
 
     const query = { clientId, deletedAt: null };
 
@@ -62,7 +64,9 @@ router.get('/', authorizationService.requireAuth, async (req, res) => {
 router.post('/', authorizationService.requireAuth, async (req, res) => {
   try {
     const { title, content, excerpt, category, tags, status = 'draft' } = req.body;
-    const clientId = req.body.clientId || req.user.clientId;
+    const clientId = req.body.clientId || req.user.userId;
+
+    console.log('POST /blogs - Creating blog with clientId:', clientId, 'from body:', req.body.clientId, 'from user:', req.user.userId);
 
     if (!title) {
       return res.status(400).json({ error: 'Title is required' });

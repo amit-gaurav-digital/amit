@@ -3,7 +3,7 @@ const GoogleAnalyticsConfig = require('../models/GoogleAnalyticsConfig');
 const verifyIntegrationExists = async (req, res, next) => {
   try {
     const { blogId } = req.params;
-    const config = await GoogleAnalyticsConfig.findOne({ blogId, clientId: req.user.clientId });
+    const config = await GoogleAnalyticsConfig.findOne({ blogId, clientId: req.user.userId });
 
     if (!config) {
       return res.status(404).json({ error: 'Integration not found' });
@@ -20,7 +20,7 @@ const verifyGAConnection = async (req, res, next) => {
   try {
     const config = req.integration || await GoogleAnalyticsConfig.findOne({
       blogId: req.params.blogId,
-      clientId: req.user.clientId
+      clientId: req.user.userId
     });
 
     if (!config || config.connectionStatus !== 'connected') {
@@ -41,7 +41,7 @@ const verifySCConnection = async (req, res, next) => {
   try {
     const config = req.integration || await GoogleAnalyticsConfig.findOne({
       blogId: req.params.blogId,
-      clientId: req.user.clientId
+      clientId: req.user.userId
     });
 
     if (!config || !config.syncSettings.scEnabled) {

@@ -12,7 +12,7 @@ const verifyBlogOwnership = async (req, res, next) => {
     const { blogId } = req.params;
     const blog = await Blog.findById(blogId);
 
-    if (!blog || blog.clientId.toString() !== req.user.clientId.toString()) {
+    if (!blog || blog.clientId.toString() !== req.user.userId.toString()) {
       return res.status(403).json({ error: 'Access denied' });
     }
 

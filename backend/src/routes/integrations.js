@@ -12,7 +12,7 @@ const verifyBlogOwnership = async (req, res, next) => {
     const { blogId } = req.params;
     const blog = await Blog.findById(blogId);
 
-    if (!blog || blog.clientId.toString() !== req.user.clientId.toString()) {
+    if (!blog || blog.clientId.toString() !== req.user.userId.toString()) {
       return res.status(403).json({ error: 'Access denied' });
     }
 
@@ -31,7 +31,7 @@ router.get('/list/:clientId', authorizationService.requireAuth, async (req, res)
   try {
     const { clientId } = req.params;
 
-    if (clientId !== req.user.clientId.toString()) {
+    if (clientId !== req.user.userId.toString()) {
       return res.status(403).json({ error: 'Access denied' });
     }
 
@@ -68,7 +68,7 @@ router.get('/status/:blogId', authorizationService.requireAuth, verifyBlogOwners
   try {
     const { blogId } = req.params;
 
-    const status = await integrationManager.getConnectionStatus(blogId, req.user.clientId);
+    const status = await integrationManager.getConnectionStatus(blogId, req.user.userId);
 
     res.json(status);
   } catch (error) {
@@ -119,7 +119,7 @@ router.post('/google-analytics/connect/:blogId', authorizationService.requireAut
 
     // Connect in database
     const result = await integrationManager.connectGoogleAnalytics(
-      req.user.clientId,
+      req.user.userId,
       blogId,
       tokens,
       {
@@ -147,7 +147,7 @@ router.post('/google-analytics/disconnect/:blogId', authorizationService.require
   try {
     const { blogId } = req.params;
 
-    const result = await integrationManager.disconnectGoogleAnalytics(blogId, req.user.clientId);
+    const result = await integrationManager.disconnectGoogleAnalytics(blogId, req.user.userId);
 
     res.json(result);
   } catch (error) {
@@ -163,7 +163,7 @@ router.post('/google-analytics/sync/:blogId', authorizationService.requireAuth, 
   try {
     const { blogId } = req.params;
 
-    const result = await integrationManager.syncGoogleAnalyticsData(blogId, req.user.clientId);
+    const result = await integrationManager.syncGoogleAnalyticsData(blogId, req.user.userId);
 
     res.json(result);
   } catch (error) {
@@ -179,7 +179,7 @@ router.get('/google-analytics/sync-history/:blogId', authorizationService.requir
   try {
     const { blogId } = req.params;
 
-    const history = await integrationManager.getSyncHistory(blogId, req.user.clientId);
+    const history = await integrationManager.getSyncHistory(blogId, req.user.userId);
 
     res.json({ syncHistory: history.gaHistory });
   } catch (error) {
@@ -200,7 +200,7 @@ router.post('/search-console/connect/:blogId', authorizationService.requireAuth,
       return res.status(400).json({ error: 'Site URL required' });
     }
 
-    const result = await integrationManager.connectSearchConsole(req.user.clientId, blogId, siteUrl, null);
+    const result = await integrationManager.connectSearchConsole(req.user.userId, blogId, siteUrl, null);
 
     res.json(result);
   } catch (error) {
@@ -217,7 +217,7 @@ router.post('/search-console/disconnect/:blogId', authorizationService.requireAu
   try {
     const { blogId } = req.params;
 
-    const result = await integrationManager.disconnectSearchConsole(blogId, req.user.clientId);
+    const result = await integrationManager.disconnectSearchConsole(blogId, req.user.userId);
 
     res.json(result);
   } catch (error) {
@@ -233,7 +233,7 @@ router.post('/search-console/sync/:blogId', authorizationService.requireAuth, ve
   try {
     const { blogId } = req.params;
 
-    const result = await integrationManager.syncSearchConsoleData(blogId, req.user.clientId);
+    const result = await integrationManager.syncSearchConsoleData(blogId, req.user.userId);
 
     res.json(result);
   } catch (error) {
@@ -249,7 +249,7 @@ router.get('/search-console/sync-history/:blogId', authorizationService.requireA
   try {
     const { blogId } = req.params;
 
-    const history = await integrationManager.getSyncHistory(blogId, req.user.clientId);
+    const history = await integrationManager.getSyncHistory(blogId, req.user.userId);
 
     res.json({ syncHistory: history.scHistory });
   } catch (error) {
@@ -265,7 +265,7 @@ router.post('/validate/:blogId', authorizationService.requireAuth, verifyBlogOwn
   try {
     const { blogId } = req.params;
 
-    const result = await integrationManager.validateConnection(blogId, req.user.clientId);
+    const result = await integrationManager.validateConnection(blogId, req.user.userId);
 
     res.json(result);
   } catch (error) {
@@ -305,7 +305,7 @@ router.get('/oauth/callback', async (req, res) => {
 router.post('/test/:blogId', authorizationService.requireAuth, verifyBlogOwnership, async (req, res) => {
   try {
     const { blogId } = req.params;
-    const status = await integrationManager.getConnectionStatus(blogId, req.user.clientId);
+    const status = await integrationManager.getConnectionStatus(blogId, req.user.userId);
 
     res.json({
       googleAnalytics: {

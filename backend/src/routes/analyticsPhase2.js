@@ -21,7 +21,7 @@ const verifyBlogOwnership = async (req, res, next) => {
     const { blogId } = req.params;
     const blog = await Blog.findById(blogId);
 
-    if (!blog || blog.clientId.toString() !== req.user.clientId.toString()) {
+    if (!blog || blog.clientId.toString() !== req.user.userId.toString()) {
       return res.status(403).json({ error: 'Access denied' });
     }
 
@@ -329,7 +329,7 @@ router.post('/compare', authorizationService.requireAuth, async (req, res) => {
 
     const comparison = new AnalyticsComparison({
       comparisonId: `cmp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      clientId: req.user.clientId,
+      clientId: req.user.userId,
       blogs: blogIds,
       dateRange: { startDate: start, endDate: end },
       createdBy: req.user._id
@@ -386,7 +386,7 @@ router.post('/goals/:blogId', authorizationService.requireAuth, verifyBlogOwners
     const goal = new AnalyticsGoal({
       goalId: `goal-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       blogId,
-      clientId: req.user.clientId,
+      clientId: req.user.userId,
       name,
       description,
       type,
@@ -426,7 +426,7 @@ router.post('/alerts/:blogId', authorizationService.requireAuth, verifyBlogOwner
     const alert = new AnalyticsAlert({
       alertId: `alert-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       blogId,
-      clientId: req.user.clientId,
+      clientId: req.user.userId,
       name,
       description,
       metric,
@@ -467,7 +467,7 @@ router.post('/reports/:blogId', authorizationService.requireAuth, verifyBlogOwne
     const report = new AnalyticsReport({
       reportId: `report-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       blogId,
-      clientId: req.user.clientId,
+      clientId: req.user.userId,
       name,
       description,
       type,
@@ -508,7 +508,7 @@ router.post('/google/connect', authorizationService.requireAuth, async (req, res
 
     const config = new GoogleAnalyticsConfig({
       configId: `ga-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      clientId: req.user.clientId,
+      clientId: req.user.userId,
       blogId,
       connectionStatus: 'connected',
       oauth: {
@@ -576,7 +576,7 @@ router.post('/search-console/sync', authorizationService.requireAuth, async (req
       siteUrl,
       config.oauth.accessToken,
       blogId,
-      req.user.clientId
+      req.user.userId
     );
 
     res.json(result);

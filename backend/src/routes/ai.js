@@ -16,7 +16,7 @@ const mongoose = require('mongoose');
 // Middleware: Check AI is enabled for client
 async function checkAIEnabled(req, res, next) {
   try {
-    const clientId = req.user.clientId;
+    const clientId = req.user.userId;
     const config = await AIGenerationConfig.findOne({ clientId });
 
     if (!config || !config.isActive) {
@@ -37,7 +37,7 @@ async function checkAIEnabled(req, res, next) {
 // Middleware: Check quota
 async function checkQuota(req, res, next) {
   try {
-    const clientId = req.user.clientId;
+    const clientId = req.user.userId;
     const quotaCheck = await QuotaService.checkQuota(clientId, 1500); // Assume ~1500 tokens per generation
 
     if (!quotaCheck.canGenerate) {
@@ -74,7 +74,7 @@ router.post('/generate/outline', authorizationService.requireAuth, checkAIEnable
       return res.status(400).json({ error: 'Topic is required' });
     }
 
-    const clientId = req.user.clientId;
+    const clientId = req.user.userId;
 
     // Create generation request record
     const generationRequest = new AIGenerationRequest({
@@ -183,7 +183,7 @@ router.post('/generate/full-content', authorizationService.requireAuth, checkAIE
       return res.status(400).json({ error: 'Topic is required' });
     }
 
-    const clientId = req.user.clientId;
+    const clientId = req.user.userId;
 
     // Create generation request
     const generationRequest = new AIGenerationRequest({
@@ -313,7 +313,7 @@ router.post('/generate/title', authorizationService.requireAuth, checkAIEnabled,
       return res.status(400).json({ error: 'Content is required' });
     }
 
-    const clientId = req.user.clientId;
+    const clientId = req.user.userId;
 
     const generationRequest = new AIGenerationRequest({
       clientId,
@@ -394,7 +394,7 @@ router.post('/generate/excerpt', authorizationService.requireAuth, checkAIEnable
       return res.status(400).json({ error: 'Content is required' });
     }
 
-    const clientId = req.user.clientId;
+    const clientId = req.user.userId;
 
     const generationRequest = new AIGenerationRequest({
       clientId,
@@ -463,7 +463,7 @@ router.post('/refine', authorizationService.requireAuth, checkAIEnabled, checkQu
       return res.status(400).json({ error: 'Content and refinementType are required' });
     }
 
-    const clientId = req.user.clientId;
+    const clientId = req.user.userId;
 
     const generationRequest = new AIGenerationRequest({
       clientId,
@@ -539,7 +539,7 @@ router.post('/rewrite', authorizationService.requireAuth, checkAIEnabled, checkQ
       return res.status(400).json({ error: 'Content and tone are required' });
     }
 
-    const clientId = req.user.clientId;
+    const clientId = req.user.userId;
 
     const generationRequest = new AIGenerationRequest({
       clientId,
@@ -614,7 +614,7 @@ router.post('/seo-optimize', authorizationService.requireAuth, checkAIEnabled, c
       return res.status(400).json({ error: 'Content is required' });
     }
 
-    const clientId = req.user.clientId;
+    const clientId = req.user.userId;
 
     const generationRequest = new AIGenerationRequest({
       clientId,
@@ -687,7 +687,7 @@ router.post('/seo-optimize', authorizationService.requireAuth, checkAIEnabled, c
 router.get('/generation/:generationRequestId', authorizationService.requireAuth, async (req, res) => {
   try {
     const { generationRequestId } = req.params;
-    const clientId = req.user.clientId;
+    const clientId = req.user.userId;
 
     const generation = await AIGenerationRequest.findOne({
       _id: generationRequestId,
@@ -711,7 +711,7 @@ router.get('/generation/:generationRequestId', authorizationService.requireAuth,
 router.get('/generations', authorizationService.requireAuth, async (req, res) => {
   try {
     const { limit = 20, skip = 0, status, generationType, sortBy = 'createdAt', order = 'desc' } = req.query;
-    const clientId = req.user.clientId;
+    const clientId = req.user.userId;
 
     const query = { clientId };
     if (status) query.status = status;
@@ -746,7 +746,7 @@ router.post('/generation/:generationRequestId/save-to-blog', authorizationServic
   try {
     const { generationRequestId } = req.params;
     const { blogId, contentType = 'full_content', variantId } = req.body;
-    const clientId = req.user.clientId;
+    const clientId = req.user.userId;
 
     // Get generation request
     const generation = await AIGenerationRequest.findOne({
@@ -847,7 +847,7 @@ router.post('/generation/:generationRequestId/discard', authorizationService.req
   try {
     const { generationRequestId } = req.params;
     const { reason } = req.body;
-    const clientId = req.user.clientId;
+    const clientId = req.user.userId;
 
     const generation = await AIGenerationRequest.findOne({
       _id: generationRequestId,
@@ -877,7 +877,7 @@ router.post('/generation/:generationRequestId/feedback', authorizationService.re
   try {
     const { generationRequestId } = req.params;
     const { rating, feedback, suggestedImprovements } = req.body;
-    const clientId = req.user.clientId;
+    const clientId = req.user.userId;
 
     if (!rating || rating < 1 || rating > 5) {
       return res.status(400).json({ error: 'Rating must be between 1-5' });
@@ -916,7 +916,7 @@ router.post('/generation/:generationRequestId/feedback', authorizationService.re
  */
 router.get('/config', authorizationService.requireAuth, async (req, res) => {
   try {
-    const clientId = req.user.clientId;
+    const clientId = req.user.userId;
 
     let config = await AIGenerationConfig.findOne({ clientId });
 
@@ -956,7 +956,7 @@ router.get('/config', authorizationService.requireAuth, async (req, res) => {
  */
 router.put('/config', authorizationService.requireAuth, async (req, res) => {
   try {
-    const clientId = req.user.clientId;
+    const clientId = req.user.userId;
     const {
       openaiApiKey,
       openaiModel,
@@ -1003,7 +1003,7 @@ router.put('/config', authorizationService.requireAuth, async (req, res) => {
  */
 router.get('/usage', authorizationService.requireAuth, async (req, res) => {
   try {
-    const clientId = req.user.clientId;
+    const clientId = req.user.userId;
     const { month } = req.query;
 
     const stats = await QuotaService.getUsageStats(clientId, month);
@@ -1024,7 +1024,7 @@ router.get('/usage', authorizationService.requireAuth, async (req, res) => {
  */
 router.get('/prompt-templates', authorizationService.requireAuth, async (req, res) => {
   try {
-    const clientId = req.user.clientId;
+    const clientId = req.user.userId;
 
     const templates = await AIPromptTemplate.find({
       $or: [

@@ -606,7 +606,7 @@ router.post('/blogs/:blogId/workflow/reviewers/reassign', authorizationService.r
 // GET: Get workflow analytics
 router.get('/workflow/analytics', authorizationService.requireAuth, async (req, res) => {
   try {
-    const clientId = req.query.clientId || req.user.clientId;
+    const clientId = req.query.clientId || req.user.userId;
 
     const workflows = await BlogWorkflow.find({ clientId });
 
