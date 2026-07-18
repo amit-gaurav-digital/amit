@@ -43,6 +43,8 @@ function GoogleAnalyticsContent() {
 
   // Handle OAuth callback when both code and blog are ready
   useEffect(() => {
+    console.log('OAuth useEffect running:', { oauthCode: !!oauthCode, selectedBlog: !!selectedBlog, codeProcessed });
+
     if (oauthCode && selectedBlog && !codeProcessed) {
       console.log('Processing OAuth with code:', oauthCode);
       console.log('Selected blog ID:', selectedBlog._id);
