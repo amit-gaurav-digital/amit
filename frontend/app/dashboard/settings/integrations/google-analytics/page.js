@@ -15,12 +15,21 @@ function GoogleAnalyticsContent() {
   const [syncing, setSyncing] = useState(false);
   const [syncHistory, setSyncHistory] = useState([]);
   const [error, setError] = useState(null);
+  const [oauthCode, setOauthCode] = useState(null);
+  const [codeProcessed, setCodeProcessed] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
       router.push('/login');
       return;
+    }
+
+    // Extract OAuth code from URL immediately
+    const code = searchParams.get('code');
+    if (code && !codeProcessed) {
+      console.log('Extracted OAuth code from URL:', code);
+      setOauthCode(code);
     }
 
     fetchBlogs();
@@ -32,18 +41,15 @@ function GoogleAnalyticsContent() {
     }
   }, [selectedBlog]);
 
-  // Handle OAuth callback when code is present in URL
+  // Handle OAuth callback when both code and blog are ready
   useEffect(() => {
-    if (selectedBlog) {
-      const code = searchParams.get('code');
-      console.log('useEffect: code from URL:', code);
-      console.log('useEffect: selectedBlog:', selectedBlog?._id);
-
-      if (code) {
-        handleOAuthCallback(code);
-      }
+    if (oauthCode && selectedBlog && !codeProcessed) {
+      console.log('Processing OAuth with code:', oauthCode);
+      console.log('Selected blog ID:', selectedBlog._id);
+      setCodeProcessed(true);
+      handleOAuthCallback(oauthCode);
     }
-  }, [selectedBlog, searchParams]);
+  }, [oauthCode, selectedBlog, codeProcessed]);
 
   const fetchBlogs = async () => {
     try {
