@@ -11,8 +11,11 @@ class GoogleAnalyticsService {
 
   async getAuthUrl(state) {
     const scope = [
+      'https://www.googleapis.com/auth/analytics',
       'https://www.googleapis.com/auth/analytics.readonly',
-      'https://www.googleapis.com/auth/analytics'
+      'https://www.googleapis.com/auth/analytics.edit',
+      'https://www.googleapis.com/auth/analytics.manage.users',
+      'https://www.googleapis.com/auth/analytics.manage.users.readonly'
     ];
 
     return `https://accounts.google.com/o/oauth2/v2/auth?${new URLSearchParams({
