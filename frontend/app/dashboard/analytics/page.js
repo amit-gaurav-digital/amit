@@ -365,6 +365,110 @@ export default function AnalyticsDashboard() {
         </div>
       )}
 
+      {/* Integrations Setup Section */}
+      <div style={{
+        backgroundColor: '#fef3c7',
+        borderRadius: '8px',
+        padding: '25px',
+        marginBottom: '30px',
+        border: '1px solid #fcd34d'
+      }}>
+        <h2 style={{ margin: '0 0 20px 0', color: '#92400e', fontSize: '20px', fontWeight: 'bold' }}>
+          🔗 Connect Your Analytics Services
+        </h2>
+        <p style={{ margin: '0 0 20px 0', color: '#78350f', fontSize: '14px' }}>
+          Sync data from Google Analytics and Search Console to unlock advanced insights
+        </p>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+          gap: '15px'
+        }}>
+          {/* Google Analytics Card */}
+          <Link href="/dashboard/settings/integrations/google-analytics" style={{ textDecoration: 'none' }}>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              padding: '16px',
+              border: '1px solid #e5e7eb',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px',
+              height: '100%'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'}
+            onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}>
+              <div style={{ fontSize: '28px' }}>📊</div>
+              <h4 style={{ margin: '0 0 4px 0', color: '#1f2937', fontWeight: '600', fontSize: '15px' }}>
+                Google Analytics
+              </h4>
+              <p style={{ margin: '0', color: '#6b7280', fontSize: '13px', lineHeight: '1.4' }}>
+                Connect GA4 to track real-time traffic and user behavior
+              </p>
+              <div style={{ marginTop: 'auto', paddingTop: '8px', borderTop: '1px solid #e5e7eb' }}>
+                <button style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  backgroundColor: '#ea4335',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: '500'
+                }}>
+                  Connect →
+                </button>
+              </div>
+            </div>
+          </Link>
+
+          {/* Search Console Card */}
+          <Link href="/dashboard/settings/integrations/search-console" style={{ textDecoration: 'none' }}>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              padding: '16px',
+              border: '1px solid #e5e7eb',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px',
+              height: '100%'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'}
+            onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}>
+              <div style={{ fontSize: '28px' }}>🔍</div>
+              <h4 style={{ margin: '0 0 4px 0', color: '#1f2937', fontWeight: '600', fontSize: '15px' }}>
+                Search Console
+              </h4>
+              <p style={{ margin: '0', color: '#6b7280', fontSize: '13px', lineHeight: '1.4' }}>
+                Link GSC to monitor search performance and indexing
+              </p>
+              <div style={{ marginTop: 'auto', paddingTop: '8px', borderTop: '1px solid #e5e7eb' }}>
+                <button style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  backgroundColor: '#4285f4',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: '500'
+                }}>
+                  Connect →
+                </button>
+              </div>
+            </div>
+          </Link>
+        </div>
+      </div>
+
       {/* Advanced Features Section */}
       <div style={{
         backgroundColor: '#f8fafc',
