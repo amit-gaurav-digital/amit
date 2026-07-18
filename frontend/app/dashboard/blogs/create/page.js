@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -14,6 +14,15 @@ export default function CreateBlogPage() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [clientId, setClientId] = useState(null);
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const parsed = JSON.parse(userData);
+      setClientId(parsed._id);
+    }
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,6 +37,12 @@ export default function CreateBlogPage() {
     setLoading(true);
     setError(null);
 
+    if (!clientId) {
+      setError('Client ID not found. Please refresh the page.');
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/blogs`,
@@ -37,7 +52,10 @@ export default function CreateBlogPage() {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           },
-          body: JSON.stringify(formData)
+          body: JSON.stringify({
+            ...formData,
+            clientId
+          })
         }
       );
 
