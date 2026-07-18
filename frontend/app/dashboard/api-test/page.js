@@ -5,6 +5,8 @@ import Link from 'next/link';
 
 export default function ApiTestPage() {
   const [mounted, setMounted] = useState(false);
+  const [results, setResults] = useState({});
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -13,8 +15,6 @@ export default function ApiTestPage() {
   if (!mounted) {
     return <div style={{ padding: '30px', textAlign: 'center' }}>Loading...</div>;
   }
-  const [results, setResults] = useState({});
-  const [loading, setLoading] = useState(false);
 
   const testEndpoint = async (name, method = 'GET', body = null) => {
     try {
