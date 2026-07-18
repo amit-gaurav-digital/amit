@@ -55,20 +55,30 @@ function GoogleAnalyticsContent() {
 
   const fetchBlogs = async () => {
     try {
+      console.log('fetchBlogs: Starting fetch...');
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/blogs`,
         {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         }
       );
+      console.log('fetchBlogs: Response status:', response.status);
+
       if (response.ok) {
         const data = await response.json();
+        console.log('fetchBlogs: Got data:', data);
         setBlogs(data.blogs || []);
         if (data.blogs && data.blogs.length > 0) {
+          console.log('fetchBlogs: Setting selected blog:', data.blogs[0].name);
           setSelectedBlog(data.blogs[0]);
+        } else {
+          console.log('fetchBlogs: No blogs found');
         }
+      } else {
+        console.log('fetchBlogs: Response not ok');
       }
     } catch (err) {
+      console.error('fetchBlogs: Error:', err);
       setError('Failed to fetch blogs');
     } finally {
       setLoading(false);
