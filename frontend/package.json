@@ -1,6 +1,6 @@
 {
   "name": "ai-blogging-frontend",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Frontend for AI-powered blog management system",
   "private": true,
   "scripts": {
