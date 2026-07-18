@@ -736,6 +736,7 @@ export default function AnalyticsDashboard() {
               )}
             </div>
           </div>
+          </div>
         </>
       ) : (
         <div style={{ padding: '30px', textAlign: 'center', color: '#6b7280' }}>
