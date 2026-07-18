@@ -301,17 +301,30 @@ router.get('/oauth/callback', async (req, res) => {
     const { code, state, error } = req.query;
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
 
+    console.log('OAuth Callback received:', {
+      hasCode: !!code,
+      hasState: !!state,
+      hasError: !!error,
+      frontendUrl,
+      queryParams: req.query
+    });
+
     if (error) {
+      console.log('OAuth error received:', error);
       return res.redirect(`${frontendUrl}/dashboard/settings/integrations?error=${error}`);
     }
 
     if (!code) {
+      console.log('No authorization code in callback');
       return res.redirect(`${frontendUrl}/dashboard/settings/integrations?error=no_code`);
     }
 
     // Redirect back to frontend with code and state so it can complete the OAuth flow
-    res.redirect(`${frontendUrl}/dashboard/settings/integrations?code=${code}&state=${state}`);
+    const redirectUrl = `${frontendUrl}/dashboard/settings/integrations?code=${code}&state=${state}`;
+    console.log('Redirecting to frontend:', redirectUrl);
+    res.redirect(redirectUrl);
   } catch (error) {
+    console.error('OAuth callback error:', error.message);
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     res.redirect(`${frontendUrl}/dashboard/settings/integrations?error=${error.message}`);
   }
