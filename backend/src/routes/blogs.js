@@ -20,7 +20,7 @@ function createSlug(title, clientId) {
 router.get('/', authorizationService.requireAuth, async (req, res) => {
   try {
     const { status, category, page = 1, limit = 20, sortBy = 'createdAt', order = 'desc', search } = req.query;
-    const clientId = req.query.clientId || req.user.clientId;
+    const clientId = req.query.clientId || req.user.userId;
 
     const query = { clientId, deletedAt: null };
 
