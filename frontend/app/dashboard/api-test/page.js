@@ -1,9 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function ApiTestPage() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return <div style={{ padding: '30px', textAlign: 'center' }}>Loading...</div>;
+  }
   const [results, setResults] = useState({});
   const [loading, setLoading] = useState(false);
 

@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function GoogleAnalyticsPage() {
+function GoogleAnalyticsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [blogs, setBlogs] = useState([]);
@@ -347,5 +347,13 @@ export default function GoogleAnalyticsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function GoogleAnalyticsPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: '30px', textAlign: 'center' }}>Loading...</div>}>
+      <GoogleAnalyticsContent />
+    </Suspense>
   );
 }

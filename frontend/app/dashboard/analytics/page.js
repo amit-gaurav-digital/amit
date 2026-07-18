@@ -585,8 +585,6 @@ export default function AnalyticsDashboard() {
               <KeywordRankings blogId={selectedBlog} token={token} />
             </div>
           </div>
-        </>
-      ) : null}
 
           {/* Charts Section */}
           <div style={{
@@ -735,7 +733,6 @@ export default function AnalyticsDashboard() {
                 <p style={{ color: '#6b7280' }}>No performance data</p>
               )}
             </div>
-          </div>
           </div>
         </>
       ) : (
