@@ -225,27 +225,46 @@ export default function GoogleAnalyticsPage() {
         )}
 
         {/* Blog Selection */}
-        {blogs.length > 0 && (
-          <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select Blog
-            </label>
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
+          <label className="block text-sm font-medium text-gray-900 mb-2">
+            Select Blog
+          </label>
+          {blogs.length > 0 ? (
             <select
               value={selectedBlog?._id || ''}
               onChange={(e) => {
                 const blog = blogs.find(b => b._id === e.target.value);
                 setSelectedBlog(blog);
               }}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white font-medium"
+              style={{
+                color: '#111827',
+                backgroundColor: '#ffffff',
+                fontSize: '16px'
+              }}
             >
+              <option value="" style={{ color: '#6b7280' }}>-- Select a blog --</option>
               {blogs.map(blog => (
-                <option key={blog._id} value={blog._id}>
-                  {blog.name}
+                <option
+                  key={blog._id}
+                  value={blog._id}
+                  style={{ color: '#111827', backgroundColor: '#ffffff' }}
+                >
+                  {blog.title || blog.name || `Blog ${blog._id?.substring(0, 8)}`}
                 </option>
               ))}
             </select>
-          </div>
-        )}
+          ) : (
+            <div className="p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+              <p className="text-sm text-yellow-800 font-medium">
+                📝 No blogs found
+              </p>
+              <p className="text-sm text-yellow-700 mt-1">
+                Create a blog first from the <Link href="/dashboard/blogs/create" className="font-semibold underline">Blogs section</Link>
+              </p>
+            </div>
+          )}
+        </div>
 
         {/* Connection Status */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
