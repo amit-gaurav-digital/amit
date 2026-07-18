@@ -29,14 +29,21 @@ function GoogleAnalyticsContent() {
   useEffect(() => {
     if (selectedBlog) {
       fetchIntegrationStatus(selectedBlog._id);
+    }
+  }, [selectedBlog]);
 
-      // Check for OAuth callback and process after blog is selected
+  // Handle OAuth callback when code is present in URL
+  useEffect(() => {
+    if (selectedBlog) {
       const code = searchParams.get('code');
+      console.log('useEffect: code from URL:', code);
+      console.log('useEffect: selectedBlog:', selectedBlog?._id);
+
       if (code) {
         handleOAuthCallback(code);
       }
     }
-  }, [selectedBlog]);
+  }, [selectedBlog, searchParams]);
 
   const fetchBlogs = async () => {
     try {
