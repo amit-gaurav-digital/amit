@@ -357,6 +357,47 @@ router.get('/oauth/callback', async (req, res) => {
 });
 
 /**
+ * POST /api/integrations/google-analytics/configure-property/:blogId
+ * Configure Google Analytics property ID
+ */
+router.post('/google-analytics/configure-property/:blogId', authorizationService.requireAuth, verifyBlogOwnership, async (req, res) => {
+  try {
+    const { blogId } = req.params;
+    const { propertyId } = req.body;
+
+    if (!propertyId) {
+      return res.status(400).json({ error: 'Property ID required' });
+    }
+
+    console.log('Configuring GA property:', { blogId, propertyId });
+
+    // Get existing config
+    const GoogleAnalyticsConfig = require('../models/GoogleAnalyticsConfig');
+    let config = await GoogleAnalyticsConfig.findOne({ blogId, clientId: req.user.userId });
+
+    if (!config) {
+      return res.status(400).json({ error: 'No GA configuration found. Please connect first.' });
+    }
+
+    // Update property info
+    config.gaAccountInfo = {
+      ...config.gaAccountInfo,
+      propertyId,
+      propertyName: `Google Analytics Property ${propertyId}`
+    };
+
+    await config.save();
+    console.log('Property configuration saved');
+
+    const status = await integrationManager.getConnectionStatus(blogId, req.user.userId);
+    res.json({ success: true, status });
+  } catch (error) {
+    console.error('Property configuration error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
  * POST /api/integrations/test/:blogId
  * Test integration connection
  */
