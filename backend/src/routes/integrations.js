@@ -98,13 +98,14 @@ router.get('/google-analytics/auth-url', authorizationService.requireAuth, async
 router.post('/google-analytics/connect/:blogId', authorizationService.requireAuth, verifyBlogOwnership, async (req, res) => {
   try {
     const { blogId } = req.params;
-    const { code } = req.body;
+    const { code, propertyId, propertyName } = req.body;
 
     console.log('GA Connect endpoint called:', {
       blogId,
       userId: req.user.userId,
       codeLength: code?.length,
-      hasCode: !!code
+      hasCode: !!code,
+      propertyId
     });
 
     if (!code) {
@@ -117,19 +118,44 @@ router.post('/google-analytics/connect/:blogId', authorizationService.requireAut
     const tokens = await googleAnalyticsService.exchangeCodeForToken(code);
     console.log('Token exchange successful, tokens received');
 
-    // Get list of properties
-    console.log('Fetching Google Analytics properties...');
-    const properties = await googleAnalyticsService.getProperties(tokens.access_token);
-    console.log('Properties fetched:', properties.length);
+    // If propertyId provided, use it directly
+    // Otherwise, try to fetch properties from Google Analytics
+    let property = null;
 
-    if (properties.length === 0) {
-      console.error('No analytics properties found for this account');
-      return res.status(400).json({ error: 'No analytics properties found' });
+    if (propertyId) {
+      console.log('Using provided property ID:', propertyId);
+      property = {
+        propertyId,
+        propertyName: propertyName || 'Google Analytics Property',
+        accountId: null,
+        websiteUrl: null,
+        timeZone: null,
+        industryCategory: null
+      };
+    } else {
+      // Try to fetch properties, but don't fail if we can't
+      try {
+        console.log('Attempting to fetch Google Analytics properties...');
+        const properties = await googleAnalyticsService.getProperties(tokens.access_token);
+        console.log('Properties fetched:', properties.length);
+
+        if (properties.length > 0) {
+          const firstProperty = properties[0];
+          property = {
+            accountId: firstProperty.parent?.split('/')[1],
+            propertyId: firstProperty.name?.split('/')[1],
+            propertyName: firstProperty.displayName,
+            websiteUrl: firstProperty.websiteUrl,
+            timeZone: firstProperty.timeZone,
+            industryCategory: firstProperty.industryCategory
+          };
+          console.log('Using first property:', property.propertyName);
+        }
+      } catch (fetchError) {
+        console.warn('Could not fetch properties, will require manual configuration:', fetchError.message);
+        // Continue without properties - user can configure later
+      }
     }
-
-    // Use the first property (user should select in UI in future)
-    const property = properties[0];
-    console.log('Using first property:', property.displayName);
 
     // Connect in database
     console.log('Saving connection to database...');
@@ -137,13 +163,13 @@ router.post('/google-analytics/connect/:blogId', authorizationService.requireAut
       req.user.userId,
       blogId,
       tokens,
-      {
-        accountId: property.parent?.split('/')[1],
-        propertyId: property.name?.split('/')[1],
-        propertyName: property.displayName,
-        websiteUrl: property.websiteUrl,
-        timeZone: property.timeZone,
-        industryCategory: property.industryCategory
+      property || {
+        propertyId: null,
+        propertyName: 'Google Analytics (Not Yet Configured)',
+        accountId: null,
+        websiteUrl: null,
+        timeZone: null,
+        industryCategory: null
       }
     );
 
