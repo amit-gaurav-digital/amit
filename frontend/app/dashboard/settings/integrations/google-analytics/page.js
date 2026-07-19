@@ -16,6 +16,8 @@ function GoogleAnalyticsContent() {
   const [syncHistory, setSyncHistory] = useState([]);
   const [error, setError] = useState(null);
   const [oauthCode, setOauthCode] = useState(null);
+  const [propertyIdInput, setPropertyIdInput] = useState('');
+  const [configuringProperty, setConfiguringProperty] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -241,6 +243,42 @@ function GoogleAnalyticsContent() {
     }
   };
 
+  const handleConfigureProperty = async () => {
+    if (!selectedBlog || !propertyIdInput.trim()) {
+      setError('Please enter a valid Property ID');
+      return;
+    }
+
+    setConfiguringProperty(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/integrations/google-analytics/configure-property/${selectedBlog._id}`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ propertyId: propertyIdInput.trim() })
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setError(null);
+        setPropertyIdInput('');
+        await fetchIntegrationStatus(selectedBlog._id);
+      } else {
+        setError(`Failed to configure property: ${data.error || 'Unknown error'}`);
+      }
+    } catch (err) {
+      setError(`Configuration failed: ${err.message}`);
+    } finally {
+      setConfiguringProperty(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -332,16 +370,38 @@ function GoogleAnalyticsContent() {
                   <span className="font-medium text-gray-900">Connected</span>
                 </div>
 
-                {integrationStatus.googleAnalytics.propertyName && (
-                  <div className="space-y-2 text-sm">
-                    <p><span className="font-medium">Property:</span> {integrationStatus.googleAnalytics.propertyName}</p>
-                    <p><span className="font-medium">Property ID:</span> {integrationStatus.googleAnalytics.propertyId}</p>
-                    {integrationStatus.googleAnalytics.lastSync && (
-                      <p>
-                        <span className="font-medium">Last Sync:</span>{' '}
-                        {new Date(integrationStatus.googleAnalytics.lastSync).toLocaleString()}
-                      </p>
-                    )}
+                <div className="space-y-2 text-sm">
+                  <p><span className="font-medium">Property:</span> {integrationStatus.googleAnalytics.propertyName}</p>
+                  <p><span className="font-medium">Property ID:</span> {integrationStatus.googleAnalytics.propertyId || '—'}</p>
+                  {integrationStatus.googleAnalytics.lastSync && (
+                    <p>
+                      <span className="font-medium">Last Sync:</span>{' '}
+                      {new Date(integrationStatus.googleAnalytics.lastSync).toLocaleString()}
+                    </p>
+                  )}
+                </div>
+
+                {integrationStatus.googleAnalytics.propertyName?.includes('Not Yet Configured') && (
+                  <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="text-sm text-yellow-800 font-medium mb-3">
+                      Enter your Google Analytics 4 Property ID to start syncing data
+                    </p>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={propertyIdInput}
+                        onChange={(e) => setPropertyIdInput(e.target.value)}
+                        placeholder="e.g., 542354645"
+                        className="flex-1 px-3 py-2 border border-yellow-300 rounded text-gray-900"
+                      />
+                      <button
+                        onClick={handleConfigureProperty}
+                        disabled={configuringProperty}
+                        className="bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-400 text-white px-4 py-2 rounded font-medium transition-colors"
+                      >
+                        {configuringProperty ? 'Saving...' : 'Save Property'}
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
