@@ -95,9 +95,15 @@ class GoogleAnalyticsService {
   async getProperties(accessToken) {
     try {
       console.log('Fetching Google Analytics properties...');
+      // Use Analytics Data API v1 instead of Admin API to avoid filter requirement
       const response = await axios.get(
-        'https://analyticsadmin.googleapis.com/v1beta/properties',
-        { headers: { Authorization: `Bearer ${accessToken}` } }
+        'https://analyticsadmin.googleapis.com/v1/properties',
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+          params: {
+            pageSize: 100
+          }
+        }
       );
       console.log('Properties fetched successfully:', response.data.properties?.length || 0);
       return response.data.properties || [];
