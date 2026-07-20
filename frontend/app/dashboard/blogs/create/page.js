@@ -26,21 +26,43 @@ export default function CreateBlogPage() {
   const [recentBlogs, setRecentBlogs] = useState([]);
 
   useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      const parsed = JSON.parse(userData);
-      setClientId(parsed._id);
-      fetchRecentBlogs();
-    }
-  }, []);
+    const initUser = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const userData = localStorage.getItem('user');
 
-  const fetchRecentBlogs = async () => {
+        if (!token) {
+          router.push('/login');
+          return;
+        }
+
+        if (userData) {
+          const parsed = JSON.parse(userData);
+          if (parsed._id || parsed.id) {
+            const id = parsed._id || parsed.id;
+            setClientId(id);
+            await fetchRecentBlogs(id);
+          }
+        }
+      } catch (err) {
+        console.error('Error initializing user:', err);
+        setError('Failed to load user data. Please refresh the page.');
+      }
+    };
+
+    initUser();
+  }, [router]);
+
+  const fetchRecentBlogs = async (userId) => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/blogs?limit=5`,
         {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${token}`
           }
         }
       );
@@ -66,8 +88,28 @@ export default function CreateBlogPage() {
     setLoading(true);
     setError(null);
 
-    if (!clientId) {
-      setError('Client ID not found. Please refresh the page.');
+    // Verify user is logged in and has clientId
+    let userId = clientId;
+    if (!userId) {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        try {
+          const parsed = JSON.parse(userData);
+          userId = parsed._id || parsed.id;
+        } catch (err) {
+          console.error('Error parsing user data:', err);
+        }
+      }
+    }
+
+    if (!userId) {
+      setError('User ID not found. Please log in again.');
+      setLoading(false);
+      return;
+    }
+
+    if (formData.status === 'scheduled' && !formData.scheduledFor) {
+      setError('Please select a publish date and time for scheduled posts.');
       setLoading(false);
       return;
     }
@@ -75,21 +117,26 @@ export default function CreateBlogPage() {
     try {
       const submitData = {
         ...formData,
-        clientId
+        userId: userId
       };
 
-      if (formData.status === 'scheduled' && formData.scheduledFor) {
+      // Remove empty scheduling fields if not scheduled
+      if (formData.status !== 'scheduled') {
+        delete submitData.scheduledFor;
+        delete submitData.scheduledTimezone;
+      } else if (formData.scheduledFor) {
         submitData.scheduledFor = new Date(formData.scheduledFor).toISOString();
         submitData.scheduledTimezone = formData.scheduledTimezone;
       }
 
+      const token = localStorage.getItem('token');
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/blogs`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify(submitData)
         }
@@ -133,6 +180,19 @@ export default function CreateBlogPage() {
           padding: '30px',
           boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
         }}>
+          {!clientId && (
+            <div style={{
+              backgroundColor: '#dbeafe',
+              color: '#1e40af',
+              padding: '12px 16px',
+              borderRadius: '6px',
+              marginBottom: '20px',
+              fontSize: '14px'
+            }}>
+              ⏳ Loading your profile...
+            </div>
+          )}
+
           {error && (
             <div style={{
               backgroundColor: '#fee2e2',
@@ -142,7 +202,7 @@ export default function CreateBlogPage() {
               marginBottom: '20px',
               fontSize: '14px'
             }}>
-              {error}
+              ❌ {error}
             </div>
           )}
 
@@ -315,19 +375,19 @@ export default function CreateBlogPage() {
           <div style={{ display: 'flex', gap: '12px' }}>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !clientId}
               style={{
                 padding: '12px 24px',
-                backgroundColor: loading ? '#9ca3af' : '#3b82f6',
+                backgroundColor: loading || !clientId ? '#9ca3af' : '#3b82f6',
                 color: 'white',
                 border: 'none',
                 borderRadius: '6px',
-                cursor: loading ? 'not-allowed' : 'pointer',
+                cursor: loading || !clientId ? 'not-allowed' : 'pointer',
                 fontWeight: '600',
                 fontSize: '14px'
               }}
             >
-              {loading ? 'Creating...' : 'Create Blog'}
+              {loading ? 'Creating...' : !clientId ? 'Loading...' : 'Create Blog'}
             </button>
             <Link href="/dashboard/blogs">
               <button
