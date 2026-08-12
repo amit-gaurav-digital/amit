@@ -9,7 +9,7 @@ const socialMediaSchema = new mongoose.Schema({
   },
   platform: {
     type: String,
-    enum: ['twitter', 'facebook', 'instagram'],
+    enum: ['linkedin', 'facebook', 'instagram', 'threads', 'twitter', 'pinterest', 'google_business', 'youtube', 'tiktok'],
     required: true
   },
   accountName: String,

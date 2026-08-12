@@ -423,8 +423,8 @@ export default function SocialMediaPage() {
 
             <div className="mb-6">
               <label className="block text-gray-700 font-medium mb-3">Select Platforms</label>
-              <div className="space-y-2">
-                {['twitter', 'facebook', 'instagram'].map(platform => (
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {['linkedin', 'facebook', 'instagram', 'threads', 'twitter', 'pinterest', 'google_business', 'youtube', 'tiktok'].map(platform => (
                   <label key={platform} className="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
                     <input
                       type="checkbox"
@@ -438,7 +438,9 @@ export default function SocialMediaPage() {
                       }}
                       className="w-4 h-4"
                     />
-                    <span className="ml-3 capitalize font-medium text-gray-900">{platform}</span>
+                    <span className="ml-3 capitalize font-medium text-gray-900">
+                      {platform === 'google_business' ? 'Google Business' : platform === 'twitter' ? 'X (Twitter)' : platform}
+                    </span>
                   </label>
                 ))}
               </div>
@@ -508,8 +510,8 @@ export default function SocialMediaPage() {
 
             <div className="mb-6">
               <label className="block text-gray-700 font-medium mb-3">Select Platforms</label>
-              <div className="space-y-2">
-                {['twitter', 'facebook', 'instagram'].map(platform => (
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {['linkedin', 'facebook', 'instagram', 'threads', 'twitter', 'pinterest', 'google_business', 'youtube', 'tiktok'].map(platform => (
                   <label key={platform} className="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
                     <input
                       type="checkbox"
@@ -523,7 +525,9 @@ export default function SocialMediaPage() {
                       }}
                       className="w-4 h-4"
                     />
-                    <span className="ml-3 capitalize font-medium text-gray-900">{platform}</span>
+                    <span className="ml-3 capitalize font-medium text-gray-900">
+                      {platform === 'google_business' ? 'Google Business' : platform === 'twitter' ? 'X (Twitter)' : platform}
+                    </span>
                   </label>
                 ))}
               </div>

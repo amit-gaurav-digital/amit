@@ -11,7 +11,7 @@ router.post('/connect/:platform', async (req, res) => {
     const { platform } = req.params;
     const { tokenData, profile } = req.body;
 
-    if (!['twitter', 'facebook', 'instagram'].includes(platform)) {
+    if (!['linkedin', 'facebook', 'instagram', 'threads', 'twitter', 'pinterest', 'google_business', 'youtube', 'tiktok'].includes(platform)) {
       return res.status(400).json({ error: 'Unsupported platform' });
     }
 
@@ -36,7 +36,7 @@ router.post('/disconnect/:platform', async (req, res) => {
   try {
     const { platform } = req.params;
 
-    if (!['twitter', 'facebook', 'instagram'].includes(platform)) {
+    if (!['linkedin', 'facebook', 'instagram', 'threads', 'twitter', 'pinterest', 'google_business', 'youtube', 'tiktok'].includes(platform)) {
       return res.status(400).json({ error: 'Unsupported platform' });
     }
 
